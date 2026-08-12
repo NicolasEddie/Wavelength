@@ -22,8 +22,17 @@ def compose_rgb(
     stretch: float = 5.0,
     q: float = 8.0,
 ) -> np.ndarray:
-    """Combine aligned R/G/B arrays into a single (H, W, 3) uint8 RGB image."""
-    return make_lupton_rgb(
+    """Combine aligned R/G/B arrays into a single (H, W, 3) uint8 RGB image.
+
+    FITS arrays store row 0 at the south (bottom of the sky), but standard
+    raster display (matplotlib, PIL, Streamlit) assumes row 0 is the top of
+    the image. Without correcting for that, the composite renders as a
+    vertical mirror of the true sky orientation -- which flips the apparent
+    chirality of anything asymmetric, like a spiral galaxy's arms. Flipping
+    here means every consumer of this array gets a correctly oriented image
+    for free.
+    """
+    rgb = make_lupton_rgb(
         aligned_bands["R"],
         aligned_bands["G"],
         aligned_bands["B"],
@@ -31,6 +40,7 @@ def compose_rgb(
         stretch=stretch,
         Q=q,
     )
+    return np.flipud(rgb)
 
 
 def main() -> None:
