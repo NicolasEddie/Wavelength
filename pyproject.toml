@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "wavelength"
+version = "0.1.0"
+description = "Interactive multi-filter astronomical RGB compositor"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "astropy>=6.0",
+    "numpy>=1.26",
+    "matplotlib>=3.8",
+    "astroquery>=0.4.7",
+    "reproject>=0.13",
+    "photutils>=1.13",
+    "streamlit>=1.35",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/wavelength"]
