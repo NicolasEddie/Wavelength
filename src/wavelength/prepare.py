@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 
 import numpy as np
+from astropy.io import fits
+from astropy.wcs import WCS
 
 from wavelength.align import load_bands, reproject_to_common
 from wavelength.config import TARGETS
@@ -35,6 +37,25 @@ def prepare_target(target_key: str) -> Path:
         wcs_header=wcs.to_header_string(),
     )
     return out_path
+
+
+def load_processed(target_key: str) -> tuple[dict[str, np.ndarray], WCS]:
+    """Load one target's cached aligned bands and shared WCS.
+
+    The read counterpart of prepare_target(). This is what the app uses at
+    runtime -- it never touches the network or the raw FITS.
+    """
+    path = PROCESSED_DATA_DIR / f"{target_key}.npz"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"No cached data for '{target_key}' at {path}. "
+            f"Run: python -m wavelength.prepare {target_key}"
+        )
+
+    with np.load(path) as data:
+        bands = {channel: data[channel] for channel in ("R", "G", "B")}
+        wcs = WCS(fits.Header.fromstring(str(data["wcs_header"])))
+    return bands, wcs
 
 
 def main() -> None:

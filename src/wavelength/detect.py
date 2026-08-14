@@ -59,6 +59,33 @@ def detect_sources_in_image(
     return catalog, segment_map
 
 
+def outline_mask(segment_map) -> np.ndarray:
+    """Trace one-pixel outlines around each detected source.
+
+    Returns a boolean mask in *display* orientation, matching what
+    compose_rgb returns, so the two can be overlaid directly. (Detection
+    runs on FITS-orientation data, where row 0 is the south of the sky;
+    without the flip the outlines land mirrored against the composite.)
+
+    SegmentationImage.outline_segments() was removed in photutils 3.0, so
+    this walks the label array directly: a pixel is an outline pixel if it
+    belongs to a source and differs from any 4-neighbour.
+    """
+    labels = segment_map.data
+    edges = np.zeros_like(labels, dtype=bool)
+
+    vertical = labels[:-1, :] != labels[1:, :]
+    edges[:-1, :] |= vertical
+    edges[1:, :] |= vertical
+
+    horizontal = labels[:, :-1] != labels[:, 1:]
+    edges[:, :-1] |= horizontal
+    edges[:, 1:] |= horizontal
+
+    edges &= labels != 0
+    return np.flipud(edges)
+
+
 def main() -> None:
     target_key = sys.argv[1] if len(sys.argv) > 1 else "m51"
     if target_key not in TARGETS:
