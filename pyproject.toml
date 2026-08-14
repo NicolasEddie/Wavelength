@@ -16,6 +16,7 @@ dependencies = [
     "astroquery>=0.4.7",
     "reproject>=0.13",
     "photutils>=1.13",
+    "scikit-image>=0.22",
     "streamlit>=1.35",
 ]
 
