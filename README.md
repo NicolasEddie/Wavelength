@@ -10,6 +10,8 @@ Sky Survey data: fetch the filter exposures, align them on a common sky grid,
 composite them with an astronomically correct stretch, and optionally run
 automated source detection over the result.
 
+![Wavelength app screenshot](assets/streamlit_app_screenshot.png)
+
 ## Quick start
 
 ```bash
