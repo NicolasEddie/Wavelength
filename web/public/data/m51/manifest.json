@@ -1,0 +1,102 @@
+{
+  "slug": "m51",
+  "displayName": "M51 (Whirlpool Galaxy)",
+  "object": "M51",
+  "width": 706,
+  "height": 706,
+  "pixelScaleArcsec": 0.85,
+  "fovArcmin": 10.0,
+  "nativeWidth": 923,
+  "nativeHeight": 923,
+  "encoding": {
+    "type": "asinh",
+    "soften": 3000.0,
+    "levels": 65520,
+    "bits": 12,
+    "dtype": "uint16",
+    "byteOrder": "little",
+    "layout": "planar"
+  },
+  "bands": {
+    "R": {
+      "file": "r.bin",
+      "survey": "SDSSi",
+      "lo": -0.05810373695355847,
+      "hi": 119.6559742966892,
+      "bytes": 996872
+    },
+    "G": {
+      "file": "g.bin",
+      "survey": "SDSSr",
+      "lo": -0.027565266296305412,
+      "hi": 117.58045168025635,
+      "bytes": 996872
+    },
+    "B": {
+      "file": "b.bin",
+      "survey": "SDSSg",
+      "lo": -0.0157937178552457,
+      "hi": 45.281636390259905,
+      "bytes": 996872
+    }
+  },
+  "preview": {
+    "file": "preview.webp",
+    "side": 384,
+    "bytes": 185754
+  },
+  "defaults": {
+    "minimum": 0.0,
+    "stretch": 5.0,
+    "q": 8.0,
+    "nSigma": 3.0
+  },
+  "detection": {
+    "sigmas": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      3.5,
+      4.0,
+      4.5,
+      5.0,
+      5.5,
+      6.0,
+      6.5,
+      7.0,
+      7.5,
+      8.0,
+      8.5,
+      9.0,
+      9.5,
+      10.0
+    ],
+    "maskPattern": "masks/sigma-{sigma}.png",
+    "catalogPattern": "catalog/sigma-{sigma}.json",
+    "maskWidth": 923,
+    "maskHeight": 923,
+    "counts": {
+      "1.0": 1412,
+      "1.5": 808,
+      "2.0": 596,
+      "2.5": 421,
+      "3.0": 349,
+      "3.5": 267,
+      "4.0": 212,
+      "4.5": 168,
+      "5.0": 146,
+      "5.5": 130,
+      "6.0": 115,
+      "6.5": 101,
+      "7.0": 93,
+      "7.5": 86,
+      "8.0": 80,
+      "8.5": 74,
+      "9.0": 70,
+      "9.5": 63,
+      "10.0": 58
+    }
+  }
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "slug": "m51",
+    "displayName": "M51 (Whirlpool Galaxy)",
+    "object": "M51",
+    "fovArcmin": 10.0,
+    "width": 706,
+    "height": 706,
+    "sourcesAt3Sigma": 349,
+    "preview": "m51/preview.webp"
+  },
+  {
+    "slug": "m101",
+    "displayName": "M101 (Pinwheel Galaxy)",
+    "object": "M101",
+    "fovArcmin": 13.0,
+    "width": 918,
+    "height": 918,
+    "sourcesAt3Sigma": 865,
+    "preview": "m101/preview.webp"
+  },
+  {
+    "slug": "m104",
+    "displayName": "M104 (Sombrero Galaxy)",
+    "object": "M104",
+    "fovArcmin": 9.0,
+    "width": 635,
+    "height": 635,
+    "sourcesAt3Sigma": 152,
+    "preview": "m104/preview.webp"
+  },
+  {
+    "slug": "m13",
+    "displayName": "M13 (Hercules Cluster)",
+    "object": "M13",
+    "fovArcmin": 12.0,
+    "width": 847,
+    "height": 847,
+    "sourcesAt3Sigma": 2075,
+    "preview": "m13/preview.webp"
+  }
+]

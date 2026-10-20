@@ -10,13 +10,19 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
 dependencies = [
-    "astropy>=6.0",
+    # Pinned to 8.x: the Lupton algorithm changed implementation between 6 and
+    # 8 (AsinhMapping -> RGBImageMappingLupton + LuptonAsinhStretch). The web
+    # renderer's shader, the exported band data, and the reference renders in
+    # web/reference/ all encode 8.x's formula, so a float across that boundary
+    # would surface as a shader mismatch rather than a dependency change.
+    "astropy>=8.0,<9",
     "numpy>=1.26",
     "matplotlib>=3.8",
     "astroquery>=0.4.7",
     "reproject>=0.13",
     "photutils>=1.13",
     "scikit-image>=0.22",
+    "pillow>=10.0",
     "streamlit>=1.35",
 ]
 

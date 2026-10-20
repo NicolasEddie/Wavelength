@@ -1,0 +1,102 @@
+{
+  "slug": "m13",
+  "displayName": "M13 (Hercules Cluster)",
+  "object": "M13",
+  "width": 847,
+  "height": 847,
+  "pixelScaleArcsec": 0.85,
+  "fovArcmin": 12.0,
+  "nativeWidth": 1108,
+  "nativeHeight": 1108,
+  "encoding": {
+    "type": "asinh",
+    "soften": 3000.0,
+    "levels": 65520,
+    "bits": 12,
+    "dtype": "uint16",
+    "byteOrder": "little",
+    "layout": "planar"
+  },
+  "bands": {
+    "R": {
+      "file": "r.bin",
+      "survey": "SDSSi",
+      "lo": -0.04680655210359484,
+      "hi": 219.7113816495753,
+      "bytes": 1434818
+    },
+    "G": {
+      "file": "g.bin",
+      "survey": "SDSSr",
+      "lo": -0.02703972290516855,
+      "hi": 135.78476279788433,
+      "bytes": 1434818
+    },
+    "B": {
+      "file": "b.bin",
+      "survey": "SDSSg",
+      "lo": -0.039789610608549464,
+      "hi": 155.64426659723216,
+      "bytes": 1434818
+    }
+  },
+  "preview": {
+    "file": "preview.webp",
+    "side": 384,
+    "bytes": 270682
+  },
+  "defaults": {
+    "minimum": 0.0,
+    "stretch": 5.0,
+    "q": 8.0,
+    "nSigma": 3.0
+  },
+  "detection": {
+    "sigmas": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      3.5,
+      4.0,
+      4.5,
+      5.0,
+      5.5,
+      6.0,
+      6.5,
+      7.0,
+      7.5,
+      8.0,
+      8.5,
+      9.0,
+      9.5,
+      10.0
+    ],
+    "maskPattern": "masks/sigma-{sigma}.png",
+    "catalogPattern": "catalog/sigma-{sigma}.json",
+    "maskWidth": 1108,
+    "maskHeight": 1108,
+    "counts": {
+      "1.0": 2782,
+      "1.5": 2611,
+      "2.0": 2506,
+      "2.5": 2290,
+      "3.0": 2075,
+      "3.5": 1907,
+      "4.0": 1772,
+      "4.5": 1671,
+      "5.0": 1566,
+      "5.5": 1446,
+      "6.0": 1370,
+      "6.5": 1291,
+      "7.0": 1227,
+      "7.5": 1153,
+      "8.0": 1097,
+      "8.5": 1033,
+      "9.0": 989,
+      "9.5": 947,
+      "10.0": 906
+    }
+  }
+}

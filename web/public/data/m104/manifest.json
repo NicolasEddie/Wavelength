@@ -1,0 +1,102 @@
+{
+  "slug": "m104",
+  "displayName": "M104 (Sombrero Galaxy)",
+  "object": "M104",
+  "width": 635,
+  "height": 635,
+  "pixelScaleArcsec": 0.85,
+  "fovArcmin": 9.0,
+  "nativeWidth": 831,
+  "nativeHeight": 831,
+  "encoding": {
+    "type": "asinh",
+    "soften": 3000.0,
+    "levels": 65520,
+    "bits": 12,
+    "dtype": "uint16",
+    "byteOrder": "little",
+    "layout": "planar"
+  },
+  "bands": {
+    "R": {
+      "file": "r.bin",
+      "survey": "SDSSi",
+      "lo": -0.011125834630117251,
+      "hi": 135.50823369917765,
+      "bytes": 806450
+    },
+    "G": {
+      "file": "g.bin",
+      "survey": "SDSSr",
+      "lo": -0.003719069654376478,
+      "hi": 181.68818891218973,
+      "bytes": 806450
+    },
+    "B": {
+      "file": "b.bin",
+      "survey": "SDSSg",
+      "lo": -0.004439268453388392,
+      "hi": 78.72258871281424,
+      "bytes": 806450
+    }
+  },
+  "preview": {
+    "file": "preview.webp",
+    "side": 384,
+    "bytes": 172534
+  },
+  "defaults": {
+    "minimum": 0.0,
+    "stretch": 5.0,
+    "q": 8.0,
+    "nSigma": 3.0
+  },
+  "detection": {
+    "sigmas": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      3.5,
+      4.0,
+      4.5,
+      5.0,
+      5.5,
+      6.0,
+      6.5,
+      7.0,
+      7.5,
+      8.0,
+      8.5,
+      9.0,
+      9.5,
+      10.0
+    ],
+    "maskPattern": "masks/sigma-{sigma}.png",
+    "catalogPattern": "catalog/sigma-{sigma}.json",
+    "maskWidth": 831,
+    "maskHeight": 831,
+    "counts": {
+      "1.0": 609,
+      "1.5": 328,
+      "2.0": 226,
+      "2.5": 178,
+      "3.0": 152,
+      "3.5": 138,
+      "4.0": 121,
+      "4.5": 108,
+      "5.0": 110,
+      "5.5": 101,
+      "6.0": 93,
+      "6.5": 89,
+      "7.0": 86,
+      "7.5": 82,
+      "8.0": 75,
+      "8.5": 69,
+      "9.0": 69,
+      "9.5": 67,
+      "10.0": 64
+    }
+  }
+}

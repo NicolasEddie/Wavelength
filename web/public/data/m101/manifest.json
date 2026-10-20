@@ -1,0 +1,102 @@
+{
+  "slug": "m101",
+  "displayName": "M101 (Pinwheel Galaxy)",
+  "object": "M101",
+  "width": 918,
+  "height": 918,
+  "pixelScaleArcsec": 0.85,
+  "fovArcmin": 13.0,
+  "nativeWidth": 1200,
+  "nativeHeight": 1200,
+  "encoding": {
+    "type": "asinh",
+    "soften": 3000.0,
+    "levels": 65520,
+    "bits": 12,
+    "dtype": "uint16",
+    "byteOrder": "little",
+    "layout": "planar"
+  },
+  "bands": {
+    "R": {
+      "file": "r.bin",
+      "survey": "SDSSi",
+      "lo": -0.05277815001940424,
+      "hi": 136.94339923196188,
+      "bytes": 1685448
+    },
+    "G": {
+      "file": "g.bin",
+      "survey": "SDSSr",
+      "lo": -0.02869517073381705,
+      "hi": 106.35204183179155,
+      "bytes": 1685448
+    },
+    "B": {
+      "file": "b.bin",
+      "survey": "SDSSg",
+      "lo": -0.0148308327695163,
+      "hi": 75.60585032517639,
+      "bytes": 1685448
+    }
+  },
+  "preview": {
+    "file": "preview.webp",
+    "side": 384,
+    "bytes": 197794
+  },
+  "defaults": {
+    "minimum": 0.0,
+    "stretch": 2.0,
+    "q": 8.0,
+    "nSigma": 3.0
+  },
+  "detection": {
+    "sigmas": [
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      3.5,
+      4.0,
+      4.5,
+      5.0,
+      5.5,
+      6.0,
+      6.5,
+      7.0,
+      7.5,
+      8.0,
+      8.5,
+      9.0,
+      9.5,
+      10.0
+    ],
+    "maskPattern": "masks/sigma-{sigma}.png",
+    "catalogPattern": "catalog/sigma-{sigma}.json",
+    "maskWidth": 1200,
+    "maskHeight": 1200,
+    "counts": {
+      "1.0": 3451,
+      "1.5": 2090,
+      "2.0": 1468,
+      "2.5": 1109,
+      "3.0": 865,
+      "3.5": 717,
+      "4.0": 579,
+      "4.5": 490,
+      "5.0": 434,
+      "5.5": 383,
+      "6.0": 339,
+      "6.5": 310,
+      "7.0": 278,
+      "7.5": 263,
+      "8.0": 247,
+      "8.5": 234,
+      "9.0": 227,
+      "9.5": 206,
+      "10.0": 198
+    }
+  }
+}

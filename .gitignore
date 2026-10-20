@@ -222,3 +222,25 @@ __marimo__/
 *.fit
 data/raw/
 data/cache/
+
+# Wavelength: web app (web/)
+# web/public/data/ is deliberately NOT ignored -- committing the exported
+# assets means the Vercel build needs no Python toolchain.
+
+# Float reference renders and measured encoding error from export_web.py.
+# Verification baselines only (~14 MB), regenerable from data/processed/.
+web/reference/
+
+# The Python template's bare `lib/` rule above matches at any depth and would
+# otherwise swallow web/lib/, where shadcn/ui places utils.ts.
+!web/lib/
+!web/**/lib/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.vercel
+next-env.d.ts
+*.tsbuildinfo
+.env*.local
