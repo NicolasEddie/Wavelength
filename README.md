@@ -12,7 +12,20 @@ automated source detection over the result.
 
 ![Wavelength app screenshot](assets/streamlit_app_screenshot.png)
 
-## Quick start
+## Web version
+
+`web/` is a Next.js site that does the compositing in the browser: the Python pipeline exports the
+aligned bands once, and the viewer re-runs the stretch in JavaScript as you move the sliders. See
+[`web/DESIGN.md`](web/DESIGN.md) for the architecture and [`web/BUILD_LOG.md`](web/BUILD_LOG.md) for how
+it was built.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+## Quick start (Streamlit + pipeline)
 
 ```bash
 python -m venv .venv

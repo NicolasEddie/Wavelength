@@ -12,7 +12,7 @@ The Python pipeline is unchanged and stays the offline data stage:
 `export_web.py` turns those into the browser payload. Nothing in the web app
 touches Python at runtime, so the Vercel deploy needs no Python toolchain.
 
-**Status:** export stage complete and verified. Frontend not started.
+**Status:** export stage complete and verified. Frontend built on the `redesign` branch with the CPU renderer (see `BUILD_LOG.md`). WebGL path deferred.
 
 ---
 
