@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource/instrument-serif/latin-400.css";
 import "@fontsource/instrument-serif/latin-400-italic.css";
 import "@fontsource-variable/inter/index.css";
+import AskWavelength from "@/components/chat/AskWavelength";
 import InteractionEffects from "@/components/InteractionEffects";
 import Starfield from "@/components/Starfield";
 import "./globals.css";
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Starfield />
         <InteractionEffects />
         <div className="relative z-[1]">{children}</div>
+        <AskWavelength />
       </body>
     </html>
   );

@@ -6,6 +6,7 @@ import { decodeBand, renderLupton, type Bands, type Manifest, type StretchParams
 import type { TargetInfo } from "@/lib/targets";
 import Logo from "@/components/Logo";
 import { MAX_ZOOM, useZoomPan } from "./useZoomPan";
+import { openChat, setViewerContext } from "@/lib/chatContext";
 
 /**
  * The interactive viewer. Downloads the three linear band files for a target,
@@ -278,6 +279,12 @@ export default function Viewer({
 
   const count = manifest.detection.counts[params.sigma.toFixed(1)] ?? 0;
 
+  // Share what the visitor is looking at with the "Ask Wavelength" chat.
+  useEffect(() => {
+    setViewerContext({ slug: manifest.slug, ...params, sourceCount: count, zoom: scale });
+  }, [manifest.slug, params, count, scale]);
+  useEffect(() => () => setViewerContext(null), []);
+
   const toggleInfo = (id: string) => setOpenInfo((o) => (o === id ? null : id));
 
   const controls: ControlSpec[] = [
@@ -369,9 +376,17 @@ export default function Viewer({
               );
             })}
           </nav>
-          <Link href="/learn" className="ulink text-sm">
-            The science
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/learn" className="ulink text-sm max-sm:hidden">
+              The science
+            </Link>
+            <button type="button" onClick={openChat} className="ask-header-btn btn btn-ghost btn-sm gap-1.5">
+              <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
+                <path d="M8 1.5c.4 2.9 1.7 4.2 4.6 4.6-2.9.4-4.2 1.7-4.6 4.6-.4-2.9-1.7-4.2-4.6-4.6C6.3 5.7 7.6 4.4 8 1.5Z" />
+              </svg>
+              Ask
+            </button>
+          </div>
         </div>
       </header>
 

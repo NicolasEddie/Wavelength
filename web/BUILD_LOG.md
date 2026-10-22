@@ -122,3 +122,27 @@ Tailwind, Vercel) for a final interview on 27 Oct. UI redesign only, no new pipe
 - **Checked:** iPhone 13 viewport, the whole image stays visible above the open dock; desktop unchanged
   (no dock, four sliders, no page scroll at 1366×768).
 - Committed in the cloud workspace while Nico's computer was off; pushed once it reconnected.
+
+## Session 6 — 22 Oct 2026 (evening, unattended): zoom, caching, Ask Wavelength
+
+Scoped in a grill round before Nico left; built while he was away; pushed to the `redesign` preview only.
+
+- **Download size:** checked live. Vercel already serves the band files Brotli-compressed (M51 1.0 → 0.75 MB,
+  M13 1.4 → 1.1 MB per band), so the old note was wrong. Added a 1-hour cache with background revalidation
+  for `/data` and `/hero`, so revisits and target switches don't re-check every file.
+- **Zoom and pan** (`components/viewer/useZoomPan.ts`): wheel or trackpad pinch zooms toward the cursor
+  (1–8×), drag pans, double-click or double-tap toggles fit ↔ 3×, two-finger pinch on phones, a readout with
+  −/+/Fit. Image, preview and source outlines share one transformed layer, so outlines stay aligned. Real
+  pixels (no smoothing) from 2× up. The image clamps so no empty edge shows.
+- **Ask Wavelength** (`app/api/chat/route.ts`, `components/chat/AskWavelength.tsx`, `lib/chatPrompt.ts`):
+  - Claude Haiku 5.5, streamed as plain text; low effort for speed. Key only in Vercel's environment.
+  - Context: page, target, slider values, source count and zoom, re-validated on the server against the
+    manifests (the browser can't inject arbitrary context).
+  - Scope: astronomy and this site; unrelated questions get a one-line redirect. Planetarium-guide voice,
+    ~150 words. Site and target facts in the prompt come from the same data the pages use.
+  - Cost guards: 500-character questions, last 10 messages, 700-token answers, ~20 questions per visitor
+    per hour (in-memory, best-effort), plus the console spend limit.
+  - UI: floating button on landing and science pages; an "Ask" header button in the viewer (clear of the
+    phone dock); side panel on desktop, slide-up sheet on phones; starter questions per page and target;
+    disclosure line; Escape closes. Hidden everywhere when no key is configured.
+  - Tested locally against a stand-in answer mode (`CHAT_MOCK=1`, never set on Vercel).
