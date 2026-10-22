@@ -24,6 +24,17 @@ interface Params {
   sources: boolean;
 }
 
+interface ControlSpec {
+  id: string;
+  label: string;
+  short: string;
+  value: number;
+  display: string;
+  range: { min: number; max: number; step: number };
+  onChange: (v: number) => void;
+  info: string;
+}
+
 const RANGES = {
   minimum: { min: 0, max: 1, step: 0.01 },
   stretch: { min: 0.5, max: 30, step: 0.1 },
@@ -82,6 +93,8 @@ export default function Viewer({
   const [params, setParams] = useState<Params>(defaults);
   const [status, setStatus] = useState<Status>("loading");
   const [openInfo, setOpenInfo] = useState<string | null>(null);
+  const [active, setActive] = useState("stretch");
+  const [dockOpen, setDockOpen] = useState(true);
   const [copied, setCopied] = useState<"idle" | "done" | "failed">("idle");
   const [aboutOpen, setAboutOpen] = useState(true);
 
@@ -260,6 +273,67 @@ export default function Viewer({
   };
 
   const count = manifest.detection.counts[params.sigma.toFixed(1)] ?? 0;
+
+  const toggleInfo = (id: string) => setOpenInfo((o) => (o === id ? null : id));
+
+  const controls: ControlSpec[] = [
+    {
+      id: "minimum",
+      label: "Black point",
+      short: "Black pt",
+      value: params.minimum,
+      display: params.minimum.toFixed(2),
+      range: RANGES.minimum,
+      onChange: (v) => set("minimum", v),
+      info: "Subtracted from every pixel before stretching. Raise it to darken the sky background and hide noise; push it too far and the faint outskirts vanish.",
+    },
+    {
+      id: "stretch",
+      label: "Stretch",
+      short: "Stretch",
+      value: params.stretch,
+      display: params.stretch.toFixed(1),
+      range: RANGES.stretch,
+      onChange: (v) => set("stretch", v),
+      info: "Sets the brightness scale where the curve stops being linear. Lower values brighten faint detail; higher values keep bright regions from saturating.",
+    },
+    {
+      id: "q",
+      label: "Softening (Q)",
+      short: "Softening",
+      value: params.q,
+      display: params.q.toFixed(1),
+      range: RANGES.q,
+      onChange: (v) => set("q", v),
+      info: "Controls how hard bright regions are compressed. Raise it to tame a glaring core and bring faint spiral arms up relative to it; lower it for a more linear, contrasty look.",
+    },
+    {
+      id: "sigma",
+      label: "Detection threshold",
+      short: "Threshold",
+      value: params.sigma,
+      display: `${params.sigma.toFixed(1)}σ`,
+      range: RANGES.sigma,
+      onChange: (v) => set("sigma", v),
+      info: "How far above the background noise a pixel must be to count as part of a source, in standard deviations (σ). Lower finds fainter sources but more false ones.",
+    },
+  ];
+  const activeControl = controls.find((c) => c.id === active);
+
+  const sourcesSwitch = (extra: string) => (
+    <label className={`flex cursor-pointer items-center justify-between gap-3 ${extra}`}>
+      <span className="flex flex-col">
+        <span className="font-medium">Show detected sources</span>
+        <span className="text-[13px] tabular-nums text-muted">
+          {count.toLocaleString("en-US")} sources at {params.sigma.toFixed(1)}σ
+        </span>
+      </span>
+      <span className="switch">
+        <input type="checkbox" role="switch" checked={params.sources} onChange={(e) => set("sources", e.target.checked)} />
+        <span aria-hidden="true" />
+      </span>
+    </label>
+  );
   const isDefault =
     params.minimum === defaults.minimum &&
     params.stretch === defaults.stretch &&
@@ -273,7 +347,7 @@ export default function Viewer({
       <header className="relative z-10 flex-none border-b border-rule bg-ink/80 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 sm:px-6">
           <Logo />
-          <nav aria-label="Targets" className="order-3 flex w-full flex-wrap gap-2 md:order-none md:w-auto">
+          <nav aria-label="Targets" className="order-3 -mx-1 flex w-[calc(100%+0.5rem)] gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] md:order-none md:mx-0 md:w-auto md:flex-wrap md:gap-2 md:overflow-visible md:px-0">
             {tabs.map((t) => {
               const current = t.slug === manifest.slug;
               return (
@@ -281,7 +355,7 @@ export default function Viewer({
                   key={t.slug}
                   href={`/targets/${t.slug}`}
                   aria-current={current ? "page" : undefined}
-                  className={`tab flex min-h-10 items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3.5 text-sm ${
+                  className={`tab flex min-h-10 flex-none items-center gap-2.5 whitespace-nowrap rounded-full py-1.5 pl-1.5 pr-3.5 text-sm ${
                     current ? "bg-raised text-fg ring-1 ring-rule-hi" : "text-muted hover:bg-surface hover:text-fg"
                   }`}
                 >
@@ -297,7 +371,7 @@ export default function Viewer({
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col lg:min-h-0 lg:flex-row">
+      <main className={`flex flex-1 flex-col lg:min-h-0 lg:flex-row ${dockOpen ? "pb-64" : "pb-20"} lg:pb-0`}>
         {/* The image takes the largest square that fits the space left (see .viewer-stage in globals.css). */}
         <figure className="viewer-stage m-0 grid min-w-0 flex-1 place-items-center bg-black/60 p-3 sm:p-5">
           <div className="viewer-square relative aspect-square overflow-hidden rounded-sm bg-black shadow-[0_30px_100px_rgba(0,0,0,.7)]">
@@ -362,69 +436,12 @@ export default function Viewer({
             </details>
           </div>
 
-          <div className="viewer-controls flex flex-col">
-            <Control
-              id="minimum"
-              label="Black point"
-              value={params.minimum}
-              display={params.minimum.toFixed(2)}
-              range={RANGES.minimum}
-              onChange={(v) => set("minimum", v)}
-              open={openInfo === "minimum"}
-              onToggle={() => setOpenInfo((o) => (o === "minimum" ? null : "minimum"))}
-              info="Subtracted from every pixel before stretching. Raise it to darken the sky background and hide noise; push it too far and the faint outskirts vanish."
-            />
-            <Control
-              id="stretch"
-              label="Stretch"
-              value={params.stretch}
-              display={params.stretch.toFixed(1)}
-              range={RANGES.stretch}
-              onChange={(v) => set("stretch", v)}
-              open={openInfo === "stretch"}
-              onToggle={() => setOpenInfo((o) => (o === "stretch" ? null : "stretch"))}
-              info="Sets the brightness scale where the curve stops being linear. Lower values brighten faint detail; higher values keep bright regions from saturating."
-            />
-            <Control
-              id="q"
-              label="Softening (Q)"
-              value={params.q}
-              display={params.q.toFixed(1)}
-              range={RANGES.q}
-              onChange={(v) => set("q", v)}
-              open={openInfo === "q"}
-              onToggle={() => setOpenInfo((o) => (o === "q" ? null : "q"))}
-              info="Controls how hard bright regions are compressed. Raise it to tame a glaring core and bring faint spiral arms up relative to it; lower it for a more linear, contrasty look."
-            />
-            <Control
-              id="sigma"
-              label="Detection threshold"
-              value={params.sigma}
-              display={`${params.sigma.toFixed(1)}σ`}
-              range={RANGES.sigma}
-              onChange={(v) => set("sigma", v)}
-              open={openInfo === "sigma"}
-              onToggle={() => setOpenInfo((o) => (o === "sigma" ? null : "sigma"))}
-              info="How far above the background noise a pixel must be to count as part of a source, in standard deviations (σ). Lower finds fainter sources but more false ones."
-            />
-
-            <label className="flex cursor-pointer items-center justify-between gap-3 border-y border-rule py-3">
-              <span className="flex flex-col">
-                <span className="font-medium">Show detected sources</span>
-                <span className="text-[13px] tabular-nums text-muted">
-                  {count.toLocaleString("en-US")} sources at {params.sigma.toFixed(1)}σ
-                </span>
-              </span>
-              <span className="switch">
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={params.sources}
-                  onChange={(e) => set("sources", e.target.checked)}
-                />
-                <span aria-hidden="true" />
-              </span>
-            </label>
+          {/* Full control list on desktop; phones get the docked panel below instead. */}
+          <div className="viewer-controls hidden flex-col lg:flex">
+            {controls.map((c) => (
+              <Control key={c.id} {...c} open={openInfo === c.id} onToggle={() => toggleInfo(c.id)} />
+            ))}
+            {sourcesSwitch("border-y border-rule py-3")}
           </div>
 
           <div className="viewer-actions flex flex-wrap gap-3">
@@ -448,6 +465,68 @@ export default function Viewer({
           </div>
         </aside>
       </main>
+
+      {/* Phones: one control at a time in a dock over the bottom of the screen, so the image stays in view. */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-2 pb-[max(8px,env(safe-area-inset-bottom))] lg:hidden">
+        {dockOpen ? (
+          <section
+            aria-label="Image controls"
+            className="pointer-events-auto mx-auto flex max-w-xl flex-col gap-2 rounded-2xl border border-rule-hi bg-ink/90 px-3 pb-2 pt-2.5 shadow-[0_-10px_40px_rgba(0,0,0,.6)] backdrop-blur-md"
+          >
+            <div className="flex items-center gap-2">
+              <div role="tablist" aria-label="Choose a setting" className="flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-full bg-black/40 p-1 [scrollbar-width:none]">
+                {controls.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active === c.id}
+                    onClick={() => setActive(c.id)}
+                    className={`min-h-9 flex-1 whitespace-nowrap rounded-full px-2 text-[12.5px] transition-colors ${
+                      active === c.id ? "bg-raised text-fg ring-1 ring-rule-hi" : "text-muted"
+                    }`}
+                  >
+                    {c.short}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setDockOpen(false)}
+                aria-label="Hide controls"
+                className="grid h-10 w-10 flex-none place-items-center rounded-full text-muted ring-1 ring-rule-hi"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                  <path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" />
+                </svg>
+              </button>
+            </div>
+            {activeControl && (
+              <Control
+                key={`dock-${activeControl.id}`}
+                {...activeControl}
+                open={openInfo === `dock-${activeControl.id}`}
+                onToggle={() => toggleInfo(`dock-${activeControl.id}`)}
+              />
+            )}
+            {sourcesSwitch("border-t border-rule pt-2")}
+          </section>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setDockOpen(true)}
+            className="btn btn-primary pointer-events-auto ml-auto flex gap-2 shadow-[0_10px_30px_rgba(0,0,0,.6)]"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M2 4h12M2 8h12M2 12h12" />
+              <circle cx="5" cy="4" r="1.6" fill="currentColor" />
+              <circle cx="10" cy="8" r="1.6" fill="currentColor" />
+              <circle cx="7" cy="12" r="1.6" fill="currentColor" />
+            </svg>
+            Adjust image
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -462,17 +541,7 @@ function Control({
   info,
   open,
   onToggle,
-}: {
-  id: string;
-  label: string;
-  value: number;
-  display: string;
-  range: { min: number; max: number; step: number };
-  onChange: (v: number) => void;
-  info: string;
-  open: boolean;
-  onToggle: () => void;
-}) {
+}: ControlSpec & { open: boolean; onToggle: () => void }) {
   const uid = useId();
   const inputId = `${uid}-${id}`;
   const noteId = `${uid}-${id}-info`;

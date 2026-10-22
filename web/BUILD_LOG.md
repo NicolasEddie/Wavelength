@@ -110,3 +110,15 @@ Tailwind, Vercel) for a final interview on 27 Oct. UI redesign only, no new pipe
   two buttons share a row.
 - **Checked:** no page scroll and no sidebar overflow at 1024×640, 1280×720, 1366×768, 1536×864 and
   1920×1080; image size up ~12% on laptops (598 → 667 px at 1366×768). Phones unchanged (stacked, scrolls).
+
+## Session 5 — 22 Oct 2026: viewer on phones (directed from a phone)
+
+- **Problem:** on phones the viewer stacked image, description and all four sliders, so changing a setting
+  meant scrolling the image out of view.
+- **Fix:** below 1024 px the controls move into a dock fixed to the bottom of the screen: a tab row picks one
+  setting (Black point, Stretch, Softening, Threshold), one slider with its info note, and the detected-sources
+  switch. It hides to an "Adjust image" button. Desktop keeps the full sidebar; both render from one shared
+  control list. Target tabs scroll in one row instead of wrapping onto two.
+- **Checked:** iPhone 13 viewport, the whole image stays visible above the open dock; desktop unchanged
+  (no dock, four sliders, no page scroll at 1366×768).
+- Committed in the cloud workspace while Nico's computer was off; pushed once it reconnected.
