@@ -529,6 +529,42 @@ h3 {
   }
 }
 
+/* ---------- Zoom and pan ---------- */
+.zoom-box {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.zoom-box[data-zoomed="true"] {
+  cursor: grab;
+}
+.zoom-box[data-zoomed="true"][data-dragging="true"] {
+  cursor: grabbing;
+}
+.zoom-layer {
+  will-change: transform;
+}
+/* Past roughly 1:1, show real pixels rather than a blur: the convention for astronomical images. */
+.zoom-box[data-pixelated="true"] canvas {
+  image-rendering: pixelated;
+}
+.zoom-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--color-fg);
+  transition: background 0.2s, opacity 0.2s;
+}
+.zoom-btn:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.08);
+}
+.zoom-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 /* Shared page container: grows to 1600px on wide screens. */
 .container-wide {
   width: 100%;

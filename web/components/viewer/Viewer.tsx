@@ -5,6 +5,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { decodeBand, renderLupton, type Bands, type Manifest, type StretchParams } from "@/lib/lupton";
 import type { TargetInfo } from "@/lib/targets";
 import Logo from "@/components/Logo";
+import { MAX_ZOOM, useZoomPan } from "./useZoomPan";
 
 /**
  * The interactive viewer. Downloads the three linear band files for a target,
@@ -105,6 +106,9 @@ export default function Viewer({
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
+  const squareRef = useRef<HTMLDivElement>(null);
+  const layerRef = useRef<HTMLDivElement>(null);
+  const { scale, zoomBy, reset: resetZoom } = useZoomPan(squareRef, layerRef);
   const workerRef = useRef<Worker | null>(null);
   const busyRef = useRef(false);
   const pendingRef = useRef<StretchParams | null>(null);
@@ -374,30 +378,54 @@ export default function Viewer({
       <main className={`flex flex-1 flex-col lg:min-h-0 lg:flex-row ${dockOpen ? "pb-64" : "pb-20"} lg:pb-0`}>
         {/* The image takes the largest square that fits the space left (see .viewer-stage in globals.css). */}
         <figure className="viewer-stage m-0 grid min-w-0 flex-1 place-items-center bg-black/60 p-3 sm:p-5">
-          <div className="viewer-square relative aspect-square overflow-hidden rounded-sm bg-black shadow-[0_30px_100px_rgba(0,0,0,.7)]">
-            {/* Instant-paint tier. Stored south-up like the bands, so flip it for display. */}
-            <img
-              src={base + manifest.preview.file}
-              alt=""
-              className={`absolute inset-0 h-full w-full -scale-y-100 object-cover transition-opacity duration-500 ${
-                status === "ready" ? "opacity-0" : "opacity-100 blur-[1px]"
-              }`}
-            />
-            <canvas
-              ref={canvasRef}
-              width={manifest.width}
-              height={manifest.height}
-              role="img"
-              aria-label={`${target.name} composited in colour from SDSS i, r and g exposures at the current settings`}
-              className={`absolute inset-0 h-full w-full transition-opacity duration-500 ${status === "ready" ? "opacity-100" : "opacity-0"}`}
-            />
-            <canvas
-              ref={overlayRef}
-              width={manifest.detection.maskWidth}
-              height={manifest.detection.maskHeight}
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 h-full w-full"
-            />
+          <div
+            ref={squareRef}
+            className="viewer-square zoom-box relative aspect-square overflow-hidden rounded-sm bg-black shadow-[0_30px_100px_rgba(0,0,0,.7)]"
+            data-pixelated={scale >= 2 ? "true" : "false"}
+          >
+            {/* Everything inside this layer zooms and pans together (see useZoomPan). */}
+            <div ref={layerRef} className="zoom-layer absolute inset-0 origin-top-left">
+              {/* Instant-paint tier. Stored south-up like the bands, so flip it for display. */}
+              <img
+                src={base + manifest.preview.file}
+                alt=""
+                draggable={false}
+                className={`absolute inset-0 h-full w-full -scale-y-100 object-cover transition-opacity duration-500 ${
+                  status === "ready" ? "opacity-0" : "opacity-100 blur-[1px]"
+                }`}
+              />
+              <canvas
+                ref={canvasRef}
+                width={manifest.width}
+                height={manifest.height}
+                role="img"
+                aria-label={`${target.name} composited in colour from SDSS i, r and g exposures at the current settings`}
+                className={`absolute inset-0 h-full w-full transition-opacity duration-500 ${status === "ready" ? "opacity-100" : "opacity-0"}`}
+              />
+              <canvas
+                ref={overlayRef}
+                width={manifest.detection.maskWidth}
+                height={manifest.detection.maskHeight}
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 h-full w-full"
+              />
+            </div>
+            <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-ink/75 p-1 ring-1 ring-rule-hi backdrop-blur">
+              <button type="button" onClick={() => zoomBy(1 / 1.5)} disabled={scale <= 1} aria-label="Zoom out" className="zoom-btn">
+                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8" stroke="currentColor" strokeWidth="1.6" /></svg>
+              </button>
+              <span className="min-w-[3.2em] text-center text-[12px] tabular-nums text-soft" aria-live="polite">
+                {scale.toFixed(1)}×
+              </span>
+              <button type="button" onClick={() => zoomBy(1.5)} disabled={scale >= MAX_ZOOM} aria-label="Zoom in" className="zoom-btn">
+                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8M6 2v8" stroke="currentColor" strokeWidth="1.6" /></svg>
+              </button>
+              {scale > 1 && (
+                <button type="button" onClick={resetZoom} className="ml-0.5 h-7 rounded-full px-2.5 text-[12px] text-fg ring-1 ring-rule-hi hover:ring-accent">
+                  Fit
+                </button>
+              )}
+            </div>
             {status !== "ready" && (
               <p
                 role="status"
@@ -407,7 +435,7 @@ export default function Viewer({
               </p>
             )}
             <figcaption className="pointer-events-none absolute bottom-2 right-2 m-0 rounded-full bg-ink/70 px-2.5 py-1 text-[11px] text-muted backdrop-blur">
-              {manifest.fovArcmin}′ field · i, r, g → R, G, B · North up
+              {manifest.fovArcmin}′ field · North up · <span className="max-lg:hidden">scroll</span><span className="lg:hidden">pinch</span> to zoom
             </figcaption>
           </div>
         </figure>
