@@ -56,3 +56,9 @@ Tailwind, Vercel) for a final interview on 27 Oct. UI redesign only, no new pipe
 - WebGL renderer (DESIGN.md §4) for larger images and weaker CPUs.
 - Zoom and pan, source hover with catalogue values, keyboard shortcuts, per-target OG images.
 - `.bin` files may be served uncompressed by Vercel (octet-stream); about 3 MB per target either way.
+
+### Deployment
+- Vercel project `wavelength`, root directory `web/`, Next.js preset. Vercel's GitHub app is limited to this
+  one repository. Every push to `redesign` builds a preview; `main` becomes production once merged.
+- The sandbox's git proxy can't push to this repo, so commits travel as a git bundle to Nico's machine
+  and are pushed from there.
