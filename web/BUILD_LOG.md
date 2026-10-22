@@ -62,3 +62,27 @@ Tailwind, Vercel) for a final interview on 27 Oct. UI redesign only, no new pipe
   one repository. Every push to `redesign` builds a preview; `main` becomes production once merged.
 - The sandbox's git proxy can't push to this repo, so commits travel as a git bundle to Nico's machine
   and are pushed from there.
+
+## Session 2 — 21 Oct 2026: checkpoint 2 feedback
+
+### Feedback → decisions (second grill round, then a revised motion prototype)
+- **Empty sides on large monitors (1920×1080):** layout now grows to 1600px (`.container-wide`) with fluid
+  type; reading widths stay capped.
+- **Background too muted:** deep blue-violet gradient, a faint Milky Way band, larger nebulae with slow
+  hue drift. Intensity chosen in the prototype (1.0).
+- **Logo:** a mark of three filter dots on one wave beside the wordmark; the wave runs on hover. Mark only
+  in the viewer header and on phones. Favicon matches.
+- **Interactive elements:** gleam sweep on primary buttons, cursor-lit borders on outlined buttons,
+  growing link underlines, gallery cards that tilt toward the cursor, restyled sliders, info buttons and
+  an on/off switch. One delegated pointer listener (`InteractionEffects`) drives the cursor-position effects.
+- **Stars react to the cursor:** tried push-away and a black-hole option. Black hole dropped as too much;
+  push-away made gentler (110 px radius, 7 px drift, smoothstep falloff, soft gradient glow instead of a
+  hard-edged halo).
+- **Easter egg:** a meteor crosses about once a minute; clicking it bursts it and briefly links nearby
+  stars into a constellation. No text popup. Faint footer hint.
+- **Hero felt "amateurish":** filter frames muted toward grey with a colour cast, and the merged frames
+  dimmed to the composite's brightness so the hand-off into colour is gradual rather than a jump.
+
+### Problems found and fixed
+- Custom button classes overrode Tailwind utilities (unlayered CSS wins over `@layer utilities`), which
+  stretched the Replay button. Moved them into `@layer components`.

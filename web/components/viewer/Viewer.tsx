@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { decodeBand, renderLupton, type Bands, type Manifest } from "@/lib/lupton";
 import type { TargetInfo } from "@/lib/targets";
+import Logo from "@/components/Logo";
 
 /**
  * The interactive viewer. Downloads the three linear band files for a target,
@@ -221,9 +222,7 @@ export default function Viewer({
     <div className="flex min-h-svh flex-col">
       <header className="relative z-10 border-b border-rule bg-ink/80 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-8">
-          <Link href="/" className="font-display text-[26px] leading-none text-fg">
-            Wavelength
-          </Link>
+          <Logo compact />
           <nav aria-label="Targets" className="order-3 flex w-full flex-wrap gap-2 md:order-none md:w-auto">
             {tabs.map((t) => {
               const current = t.slug === manifest.slug;
@@ -232,7 +231,7 @@ export default function Viewer({
                   key={t.slug}
                   href={`/targets/${t.slug}`}
                   aria-current={current ? "page" : undefined}
-                  className={`flex min-h-10 items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3.5 text-sm transition-colors ${
+                  className={`tab flex min-h-10 items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3.5 text-sm ${
                     current ? "bg-raised text-fg ring-1 ring-rule-hi" : "text-muted hover:bg-surface hover:text-fg"
                   }`}
                 >
@@ -242,7 +241,7 @@ export default function Viewer({
               );
             })}
           </nav>
-          <Link href="/learn" className="text-sm text-muted hover:text-fg">
+          <Link href="/learn" className="ulink text-sm">
             The science
           </Link>
         </div>
@@ -250,7 +249,7 @@ export default function Viewer({
 
       <main className="flex flex-1 flex-col lg:flex-row">
         <figure className="m-0 flex min-w-0 flex-1 flex-col items-center justify-center gap-4 bg-black/60 p-4 sm:p-8">
-          <div className="relative aspect-square w-full max-w-[min(780px,calc(100svh-170px))] overflow-hidden rounded-sm bg-black shadow-[0_30px_100px_rgba(0,0,0,.7)]">
+          <div className="relative aspect-square w-full max-w-[min(1000px,calc(100svh-170px))] overflow-hidden rounded-sm bg-black shadow-[0_30px_100px_rgba(0,0,0,.7)]">
             {/* Instant-paint tier. Stored south-up like the bands, so flip it for display. */}
             <img
               src={base + manifest.preview.file}
@@ -290,7 +289,7 @@ export default function Viewer({
 
         <aside
           aria-label="Controls"
-          className="flex w-full flex-col gap-8 border-t border-rule bg-ink/70 px-5 py-8 backdrop-blur sm:px-9 lg:w-[400px] lg:flex-none lg:border-l lg:border-t-0 lg:py-10"
+          className="flex w-full flex-col gap-8 border-t border-rule bg-ink/70 px-5 py-8 backdrop-blur sm:px-9 lg:w-[clamp(380px,24vw,460px)] lg:flex-none lg:border-l lg:border-t-0 lg:py-10"
         >
           <div className="flex flex-col gap-1.5">
             <p className="text-xs uppercase tracking-[0.18em] text-accent">{target.catalogue}</p>
@@ -354,12 +353,15 @@ export default function Viewer({
                   {count.toLocaleString("en-US")} sources at {params.sigma.toFixed(1)}σ
                 </span>
               </span>
-              <input
-                type="checkbox"
-                checked={params.sources}
-                onChange={(e) => set("sources", e.target.checked)}
-                className="h-5 w-5 accent-accent"
-              />
+              <span className="switch">
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={params.sources}
+                  onChange={(e) => set("sources", e.target.checked)}
+                />
+                <span aria-hidden="true" />
+              </span>
             </label>
           </div>
 
@@ -368,14 +370,14 @@ export default function Viewer({
               type="button"
               onClick={() => setParams(defaults)}
               disabled={isDefault}
-              className="min-h-11 flex-auto rounded-full border border-rule-hi px-5 text-sm font-medium text-fg transition-colors hover:border-accent disabled:cursor-default disabled:opacity-40 disabled:hover:border-rule-hi"
+              className="btn btn-ghost flex-auto text-sm"
             >
               Reset to defaults
             </button>
             <button
               type="button"
               onClick={copyLink}
-              className="min-h-11 flex-auto rounded-full bg-fg px-5 text-sm font-medium text-ink transition-colors hover:bg-white"
+              className="btn btn-primary flex-auto text-sm"
             >
               <span aria-live="polite">
                 {copied === "done" ? "Link copied" : copied === "failed" ? "Copy the address bar instead" : "Copy link to this view"}
@@ -428,9 +430,7 @@ function Control({
             aria-expanded={open}
             aria-controls={noteId}
             aria-label={`About ${label.toLowerCase()}`}
-            className={`grid h-7 w-7 place-items-center rounded-full border font-display text-[15px] italic transition-colors ${
-              open ? "border-accent bg-accent text-ink" : "border-rule-hi text-muted hover:text-fg"
-            }`}
+            className="info-btn grid h-7 w-7 place-items-center rounded-full border border-rule-hi font-display text-[15px] italic text-muted"
           >
             i
           </button>
@@ -444,6 +444,8 @@ function Control({
         step={range.step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
+        className="range"
+        style={{ "--pct": `${((value - range.min) / (range.max - range.min)) * 100}%` } as React.CSSProperties}
         aria-describedby={open ? noteId : undefined}
       />
       <div
@@ -452,7 +454,10 @@ function Control({
         className="rounded-lg border border-rule-hi bg-raised px-4 py-3.5 text-sm leading-relaxed text-soft"
       >
         {info}{" "}
-        <Link href={`/learn#${id === "sigma" ? "detection" : "stretch"}`} className="text-accent hover:text-accent-hi">
+        <Link
+          href={`/learn#${id === "sigma" ? "detection" : "stretch"}`}
+          className="text-accent underline decoration-accent/40 underline-offset-4 hover:text-accent-hi"
+        >
           More in The science
         </Link>
       </div>

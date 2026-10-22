@@ -28,6 +28,9 @@ const STEPS = [
 const DURATION = 4600;
 const DELAY = 700;
 const FINAL_SIZE = 64; // composite width, % of the stage
+// The merged frames sum to ~2.4x one grey frame (TINT_OTHER = 0.7 in scripts/make_hero_assets.py), and
+// each frame is stretched brighter than the composite, so scale down further to meet it.
+const MERGED_OPACITY = 0.28;
 
 const clamp = (x: number, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -46,13 +49,15 @@ export default function HeroMerge() {
     const conv = ease(clamp((p - 0.36) / 0.34));
     const spread = 1 - conv;
     const size = lerp(30, FINAL_SIZE, conv);
-    const fade = ease(clamp((p - 0.72) / 0.24));
+    const fade = ease(clamp((p - 0.6) / 0.36));
     frameRefs.current.forEach((f, i) => {
       if (!f) return;
       const x = (i - 1) * 34 * spread * (100 / size);
       f.style.width = `${size}%`;
       f.style.transform = `translate(-50%, -50%) translateX(${x}%)`;
-      f.style.opacity = String(1 - fade * 0.9);
+      // Tinted frames add their light together (plus-lighter). Each carries ~2.2x the
+      // light of one channel, so dim them as they converge to keep the sum near grey.
+      f.style.opacity = String((1 - fade * 0.9) * lerp(1, MERGED_OPACITY, conv));
       const [grey, tinted, tag] = f.children as unknown as HTMLElement[];
       grey.style.opacity = String(1 - tint);
       tinted.style.opacity = String(tint);
@@ -86,11 +91,11 @@ export default function HeroMerge() {
   }, [play]);
 
   return (
-    <div className="relative mx-auto flex w-full flex-col gap-5 rounded-[18px] border border-rule-hi bg-ink-deep/95 p-5 shadow-[0_30px_100px_rgba(0,0,0,.55),inset_0_1px_0_rgba(255,255,255,.04)] sm:p-6 lg:max-w-[calc((100svh-400px)/0.66+48px)]">
+    <div className="relative mx-auto flex w-full flex-col gap-5 rounded-[18px] border border-rule-hi bg-ink-deep/90 p-5 shadow-[0_30px_100px_rgba(0,0,0,.55),inset_0_1px_0_rgba(255,255,255,.04)] sm:p-6 lg:max-w-[calc((100svh-380px)/0.66+48px)]">
       <button
         type="button"
         onClick={play}
-        className="absolute right-4 top-4 z-10 min-h-9 rounded-full border border-rule-hi bg-ink/80 px-3 text-xs text-muted transition-colors hover:text-fg"
+        className="btn btn-ghost btn-sm absolute right-4 top-4 z-10"
       >
         Replay
       </button>

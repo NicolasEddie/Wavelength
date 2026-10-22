@@ -35,7 +35,7 @@ export default function Learn() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-[1200px] px-4 pb-24 pt-10 sm:px-8">
+      <main className="container-wide pb-24 pt-10">
         <div className="flex flex-col gap-4 pb-16">
           <p className="text-xs uppercase tracking-[0.18em] text-accent">The science</p>
           <h1 className="max-w-[14em] font-display text-[clamp(44px,6vw,72px)] font-normal leading-[1.02]">
@@ -52,7 +52,7 @@ export default function Learn() {
             <ol className="m-0 flex list-none flex-wrap gap-x-5 gap-y-2 p-0 text-sm lg:flex-col lg:gap-3">
               {SECTIONS.map((s, i) => (
                 <li key={s.id}>
-                  <a href={`#${s.id}`} className="text-muted no-underline hover:text-fg">
+                  <a href={`#${s.id}`} className="ulink">
                     <span className="mr-2 font-display text-accent">{i + 1}</span>
                     {s.label}
                   </a>
@@ -187,22 +187,19 @@ export default function Learn() {
                 structured interview, compared two visual directions and an interactive motion prototype, then directed the
                 implementation, reviewing each deployed result. The decisions, checks and problems found along the way are
                 recorded in the{" "}
-                <a className="text-accent hover:text-accent-hi" href="https://github.com/NicolasEddie/Wavelength/blob/redesign/web/BUILD_LOG.md">
+                <a className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:text-accent-hi hover:decoration-accent" href="https://github.com/NicolasEddie/Wavelength/blob/redesign/web/BUILD_LOG.md">
                   build log
                 </a>
                 .
               </p>
               <p>
                 Built with Next.js, React, Tailwind CSS and Vercel. Imagery from{" "}
-                <a className="text-accent hover:text-accent-hi" href="https://www.sdss.org/">SDSS</a> via{" "}
-                <a className="text-accent hover:text-accent-hi" href="https://skyview.gsfc.nasa.gov/">NASA SkyView</a>, used
+                <a className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:text-accent-hi hover:decoration-accent" href="https://www.sdss.org/">SDSS</a> via{" "}
+                <a className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:text-accent-hi hover:decoration-accent" href="https://skyview.gsfc.nasa.gov/">NASA SkyView</a>, used
                 under CC-BY and the SDSS Image Use Policy.
               </p>
               <div>
-                <Link
-                  href="/targets/m51"
-                  className="inline-flex min-h-11 items-center rounded-full bg-fg px-6 font-medium text-ink no-underline transition-colors hover:bg-white"
-                >
+                <Link href="/targets/m51" className="btn btn-primary">
                   Try the viewer
                 </Link>
               </div>

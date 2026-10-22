@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource/instrument-serif/latin-400.css";
 import "@fontsource/instrument-serif/latin-400-italic.css";
 import "@fontsource-variable/inter/index.css";
+import InteractionEffects from "@/components/InteractionEffects";
 import Starfield from "@/components/Starfield";
 import "./globals.css";
 
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0b0e",
+  themeColor: "#0a0916",
   colorScheme: "dark",
 };
 
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="antialiased">
         <Starfield />
+        <InteractionEffects />
         <div className="relative z-[1]">{children}</div>
       </body>
     </html>

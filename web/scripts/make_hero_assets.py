@@ -20,6 +20,7 @@ DATA_ROOT = ROOT / "public" / "data"
 DATA = DATA_ROOT / "m51"
 OUT = ROOT / "public" / "hero"
 SIDE = 640
+TINT_OTHER = 0.7  # 0 = pure red/green/blue, 1 = plain grey
 
 
 def decode(manifest, key, data=DATA):
@@ -49,8 +50,11 @@ def main():
         grey = np.clip(np.arcsinh(np.clip(band, 0, None) * q / stretch) * slope * 4, 0, 1)
         grey8 = (grey * 255).astype(np.uint8)
         save(grey8, f"m51-{name}-grey.webp")
-        tinted = np.zeros(grey8.shape + (3,), np.uint8)
-        tinted[..., index] = grey8
+        # Muted tint: the frame's own channel at full strength, the other two at
+        # TINT_OTHER, so each frame reads as grey with a clear colour cast.
+        weights = np.full(3, TINT_OTHER)
+        weights[index] = 1.0
+        tinted = (grey8[..., None] * weights).round().astype(np.uint8)
         save(tinted, f"m51-{name}-tint.webp")
 
     save(lupton(bands, stretch, q), "m51-composite.webp")
