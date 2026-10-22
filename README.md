@@ -3,6 +3,10 @@
 **Turns real multi-filter telescope data into color astronomical images, with
 automated source detection.**
 
+**Live site: [wavelength-nicolaseddie.vercel.app](https://wavelength-nicolaseddie.vercel.app)**
+
+![Wavelength landing page](assets/web_landing.webp)
+
 Observatories don't take color pictures — they record one grayscale frame per
 filter. Color images are assembled afterwards by mapping those frames onto red,
 green, and blue channels. Wavelength does that assembly on real Sloan Digital
@@ -10,14 +14,20 @@ Sky Survey data: fetch the filter exposures, align them on a common sky grid,
 composite them with an astronomically correct stretch, and optionally run
 automated source detection over the result.
 
-![Wavelength app screenshot](assets/streamlit_app_screenshot.png)
+![Wavelength viewer with detected sources](assets/web_viewer.webp)
 
 ## Web version
 
-`web/` is a Next.js site that does the compositing in the browser: the Python pipeline exports the
-aligned bands once, and the viewer re-runs the stretch in JavaScript as you move the sliders. See
-[`web/DESIGN.md`](web/DESIGN.md) for the architecture and [`web/BUILD_LOG.md`](web/BUILD_LOG.md) for how
-it was built.
+`web/` is a Next.js site (React, TypeScript, Tailwind CSS, deployed on Vercel) that does the
+compositing in the browser. The Python pipeline exports the aligned bands once; the viewer re-runs
+the stretch in a Web Worker as you move the sliders, and the result is tested pixel by pixel against
+astropy's own output.
+
+- [`web/DESIGN.md`](web/DESIGN.md) — architecture, data format, renderer contract
+- [`web/BUILD_LOG.md`](web/BUILD_LOG.md) — how the redesign was built: decisions, checks, bugs fixed
+- [`CLAUDE.md`](CLAUDE.md) — working rules for the AI agent that built it
+
+The redesign was built agentically with Claude, without opening an IDE.
 
 ```bash
 cd web
@@ -26,6 +36,11 @@ npm run dev
 ```
 
 ## Quick start (Streamlit + pipeline)
+
+The original Streamlit app is still here:
+
+![Original Streamlit app](assets/streamlit_app_screenshot.png)
+
 
 ```bash
 python -m venv .venv
