@@ -83,6 +83,12 @@ export default function Viewer({
   const [status, setStatus] = useState<Status>("loading");
   const [openInfo, setOpenInfo] = useState<string | null>(null);
   const [copied, setCopied] = useState<"idle" | "done" | "failed">("idle");
+  const [aboutOpen, setAboutOpen] = useState(true);
+
+  // Start the description collapsed when the screen is short, so everything fits without scrolling.
+  useEffect(() => {
+    if (window.matchMedia("(max-height: 900px) and (min-width: 1024px)").matches) setAboutOpen(false);
+  }, []);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
@@ -262,9 +268,10 @@ export default function Viewer({
     !params.sources;
 
   return (
-    <div className="flex min-h-svh flex-col">
-      <header className="relative z-10 border-b border-rule bg-ink/80 backdrop-blur">
-        <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-8">
+    // On desktop the viewer is a one-screen app: header, then image + controls filling the rest.
+    <div className="flex min-h-svh flex-col lg:h-svh lg:overflow-hidden">
+      <header className="relative z-10 flex-none border-b border-rule bg-ink/80 backdrop-blur">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 sm:px-6">
           <Logo />
           <nav aria-label="Targets" className="order-3 flex w-full flex-wrap gap-2 md:order-none md:w-auto">
             {tabs.map((t) => {
@@ -290,9 +297,10 @@ export default function Viewer({
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col lg:flex-row">
-        <figure className="m-0 flex min-w-0 flex-1 flex-col items-center justify-center gap-4 bg-black/60 p-4 sm:p-8">
-          <div className="relative aspect-square w-full max-w-[min(1000px,calc(100svh-170px))] overflow-hidden rounded-sm bg-black shadow-[0_30px_100px_rgba(0,0,0,.7)]">
+      <main className="flex flex-1 flex-col lg:min-h-0 lg:flex-row">
+        {/* The image takes the largest square that fits the space left (see .viewer-stage in globals.css). */}
+        <figure className="viewer-stage m-0 grid min-w-0 flex-1 place-items-center bg-black/60 p-3 sm:p-5">
+          <div className="viewer-square relative aspect-square overflow-hidden rounded-sm bg-black shadow-[0_30px_100px_rgba(0,0,0,.7)]">
             {/* Instant-paint tier. Stored south-up like the bands, so flip it for display. */}
             <img
               src={base + manifest.preview.file}
@@ -324,26 +332,37 @@ export default function Viewer({
                 {status === "loading" ? "Loading full-resolution data…" : "Couldn’t load the image data. Reload the page to try again."}
               </p>
             )}
+            <figcaption className="pointer-events-none absolute bottom-2 right-2 m-0 rounded-full bg-ink/70 px-2.5 py-1 text-[11px] text-muted backdrop-blur">
+              {manifest.fovArcmin}′ field · i, r, g → R, G, B · North up
+            </figcaption>
           </div>
-          <figcaption className="text-[13px] text-muted">
-            {manifest.fovArcmin}′ field · SDSS i, r, g → R, G, B · North up
-          </figcaption>
         </figure>
 
         <aside
           aria-label="Controls"
-          className="flex w-full flex-col gap-8 border-t border-rule bg-ink/70 px-5 py-8 backdrop-blur sm:px-9 lg:w-[clamp(380px,24vw,460px)] lg:flex-none lg:border-l lg:border-t-0 lg:py-10"
+          className="viewer-aside flex w-full flex-col border-t border-rule bg-ink/70 px-5 py-6 backdrop-blur sm:px-7 lg:w-[clamp(330px,26vw,440px)] lg:flex-none lg:overflow-y-auto lg:border-l lg:border-t-0"
         >
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1">
             <p className="text-xs uppercase tracking-[0.18em] text-accent">{target.catalogue}</p>
-            <h1 className="font-display text-[44px] font-normal leading-[1.05]">{target.name}</h1>
-            <p className="text-[15px] leading-relaxed text-muted">{target.blurb}</p>
-            <p className="text-[13px] text-muted">
-              {target.kind} in {target.constellation}, {target.distance} away.
-            </p>
+            <h1 className="font-display text-[clamp(30px,2.6vw,44px)] font-normal leading-[1.05]">{target.name}</h1>
+            {/* Collapsed by default on shorter screens so the controls fit without scrolling. */}
+            <details open={aboutOpen} onToggle={(e) => setAboutOpen((e.target as HTMLDetailsElement).open)} className="about group mt-1">
+              <summary className="flex w-fit cursor-pointer list-none items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-fg">
+                <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" className="transition-transform group-open:rotate-90">
+                  <path d="M3 1.5 6.5 5 3 8.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+                About this {target.kind === "Globular cluster" ? "cluster" : "galaxy"}
+              </summary>
+              <div className="flex flex-col gap-1.5 pt-2">
+                <p className="text-[15px] leading-relaxed text-muted">{target.blurb}</p>
+                <p className="text-[13px] text-muted">
+                  {target.kind} in {target.constellation}, {target.distance} away.
+                </p>
+              </div>
+            </details>
           </div>
 
-          <div className="flex flex-col gap-6">
+          <div className="viewer-controls flex flex-col">
             <Control
               id="minimum"
               label="Black point"
@@ -389,7 +408,7 @@ export default function Viewer({
               info="How far above the background noise a pixel must be to count as part of a source, in standard deviations (σ). Lower finds fainter sources but more false ones."
             />
 
-            <label className="flex cursor-pointer items-center justify-between gap-3 border-y border-rule py-3.5">
+            <label className="flex cursor-pointer items-center justify-between gap-3 border-y border-rule py-3">
               <span className="flex flex-col">
                 <span className="font-medium">Show detected sources</span>
                 <span className="text-[13px] tabular-nums text-muted">
@@ -408,22 +427,22 @@ export default function Viewer({
             </label>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="viewer-actions flex flex-wrap gap-3">
             <button
               type="button"
               onClick={() => setParams(defaults)}
               disabled={isDefault}
-              className="btn btn-ghost flex-auto text-sm"
+              className="btn btn-ghost flex-1 whitespace-nowrap px-4 text-sm"
             >
-              Reset to defaults
+              Reset
             </button>
             <button
               type="button"
               onClick={copyLink}
-              className="btn btn-primary flex-auto text-sm"
+              className="btn btn-primary flex-1 whitespace-nowrap px-4 text-sm"
             >
               <span aria-live="polite">
-                {copied === "done" ? "Link copied" : copied === "failed" ? "Copy the address bar instead" : "Copy link to this view"}
+                {copied === "done" ? "Link copied" : copied === "failed" ? "Copy from the address bar" : "Copy link"}
               </span>
             </button>
           </div>
@@ -458,7 +477,7 @@ function Control({
   const inputId = `${uid}-${id}`;
   const noteId = `${uid}-${id}-info`;
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between gap-2">
         <label htmlFor={inputId} className="font-medium">
           {label}

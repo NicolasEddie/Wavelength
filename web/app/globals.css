@@ -491,6 +491,44 @@ h3 {
   box-shadow: 0 0 12px rgb(224 190 134 / 0.45);
 }
 
+/* ---------- Viewer layout ---------- */
+/* The stage is a size container; the square takes the largest side that fits it. */
+.viewer-stage {
+  container-type: inline-size;
+}
+.viewer-square {
+  width: min(100cqw, 1000px);
+}
+.viewer-controls {
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+.viewer-actions {
+  margin-top: 1.5rem;
+}
+@media (min-width: 1024px) {
+  .viewer-stage {
+    container-type: size;
+    min-height: 0;
+  }
+  .viewer-square {
+    width: min(100cqw, 100cqh);
+  }
+}
+/* Short screens: tighten the sidebar rhythm so the controls fit in one view. */
+@media (min-width: 1024px) and (max-height: 820px) {
+  .viewer-aside {
+    padding-block: 1rem;
+  }
+  .viewer-controls {
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .viewer-actions {
+    margin-top: 1rem;
+  }
+}
+
 /* Shared page container: grows to 1600px on wide screens. */
 .container-wide {
   width: 100%;

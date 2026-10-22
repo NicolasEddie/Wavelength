@@ -98,3 +98,15 @@ Tailwind, Vercel) for a final interview on 27 Oct. UI redesign only, no new pipe
   workers. Same `lupton.ts`, so the verification still covers it.
 - **Viewer logo:** wordmark restored next to the mark.
 - **Gallery cards:** removed the cursor-following highlight ("flashlight"); the tilt and lift remain.
+
+## Session 4 — 22 Oct 2026: viewer on laptop screens
+
+- **Problem:** on a 1366×768 laptop the viewer page was ~1000 px tall, so the bottom was cut off and needed
+  scrolling, and the image was capped at 598 px.
+- **Fix:** on desktop the viewer is now a one-screen app (`h-svh`, no page scroll). The image stage is a CSS
+  size container and the square takes `min(100cqw, 100cqh)`, the largest that fits any window. The caption
+  moved onto the image. The sidebar scrolls on its own only as a last resort: the galaxy description folds
+  into an "About this galaxy" disclosure on screens under 900 px tall, spacing tightens under 820 px, and the
+  two buttons share a row.
+- **Checked:** no page scroll and no sidebar overflow at 1024×640, 1280×720, 1366×768, 1536×864 and
+  1920×1080; image size up ~12% on laptops (598 → 667 px at 1366×768). Phones unchanged (stacked, scrolls).
