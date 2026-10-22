@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { decodeBand, renderLupton, type Bands, type Manifest } from "@/lib/lupton";
+import { decodeBand, renderLupton, type Bands, type Manifest, type StretchParams } from "@/lib/lupton";
 import type { TargetInfo } from "@/lib/targets";
 import Logo from "@/components/Logo";
 
@@ -86,9 +86,10 @@ export default function Viewer({
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
-  const bandsRef = useRef<Bands | null>(null);
-  const pixelsRef = useRef<ImageData | null>(null);
-  const rafRef = useRef(0);
+  const workerRef = useRef<Worker | null>(null);
+  const busyRef = useRef(false);
+  const pendingRef = useRef<StretchParams | null>(null);
+  const fallbackRef = useRef<{ bands: Bands; img: ImageData } | null>(null);
   const maskCache = useRef(new Map<number, ImageData>());
 
   // Pick up a shared link's settings once, on the client.
@@ -96,10 +97,33 @@ export default function Viewer({
     setParams(paramsFromUrl(manifest));
   }, [manifest]);
 
-  // Download and decode the three bands.
+  /** Send the newest slider values to the worker; if it is mid-frame, keep only the latest. */
+  const requestFrame = useCallback((p: StretchParams) => {
+    const worker = workerRef.current;
+    if (worker) {
+      if (busyRef.current) {
+        pendingRef.current = p;
+        return;
+      }
+      busyRef.current = true;
+      worker.postMessage({ type: "render", params: p, id: 0 });
+      return;
+    }
+    // No worker support: render on the main thread, once per animation frame.
+    const fb = fallbackRef.current;
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!fb || !ctx) return;
+    requestAnimationFrame(() => {
+      renderLupton(fb.bands, p, fb.img.data, true);
+      ctx.putImageData(fb.img, 0, 0);
+    });
+  }, []);
+
+  // Download the three bands, then hand them to a background worker to decode and render.
   useEffect(() => {
     let cancelled = false;
     const ctrl = new AbortController();
+    let worker: Worker | null = null;
     (async () => {
       try {
         const keys = ["R", "G", "B"] as const;
@@ -111,13 +135,37 @@ export default function Viewer({
           }),
         );
         if (cancelled) return;
-        const [r, g, b] = bufs.map((buf, i) => {
-          const band = manifest.bands[keys[i]];
-          return decodeBand(buf, band.lo, band.hi, manifest.encoding);
-        });
-        bandsRef.current = { width: manifest.width, height: manifest.height, r, g, b };
-        pixelsRef.current = new ImageData(manifest.width, manifest.height);
-        setStatus("ready");
+        const ranges = keys.map((k) => ({ lo: manifest.bands[k].lo, hi: manifest.bands[k].hi }));
+
+        if (typeof Worker !== "undefined") {
+          worker = new Worker(new URL("../../lib/render.worker.ts", import.meta.url));
+          worker.onmessage = (e: MessageEvent) => {
+            const msg = e.data;
+            if (msg.type === "ready") {
+              workerRef.current = worker;
+              setStatus("ready");
+            } else if (msg.type === "frame") {
+              const ctx = canvasRef.current?.getContext("2d");
+              ctx?.putImageData(new ImageData(msg.pixels, manifest.width, manifest.height), 0, 0);
+              busyRef.current = false;
+              const next = pendingRef.current;
+              pendingRef.current = null;
+              if (next) requestFrame(next);
+            }
+          };
+          worker.onerror = () => !cancelled && setStatus("error");
+          worker.postMessage(
+            { type: "bands", width: manifest.width, height: manifest.height, buffers: bufs, ranges, encoding: manifest.encoding },
+            bufs,
+          );
+        } else {
+          const [r, g, b] = bufs.map((buf, i) => decodeBand(buf, ranges[i].lo, ranges[i].hi, manifest.encoding));
+          fallbackRef.current = {
+            bands: { width: manifest.width, height: manifest.height, r, g, b },
+            img: new ImageData(manifest.width, manifest.height),
+          };
+          setStatus("ready");
+        }
       } catch (e) {
         if (!cancelled && (e as Error).name !== "AbortError") setStatus("error");
       }
@@ -125,23 +173,18 @@ export default function Viewer({
     return () => {
       cancelled = true;
       ctrl.abort();
+      worker?.terminate();
+      workerRef.current = null;
+      busyRef.current = false;
+      pendingRef.current = null;
     };
-  }, [base, manifest]);
+  }, [base, manifest, requestFrame]);
 
   // Re-render the composite whenever the stretch changes.
   useEffect(() => {
     if (status !== "ready") return;
-    cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      const bands = bandsRef.current;
-      const img = pixelsRef.current;
-      const ctx = canvasRef.current?.getContext("2d");
-      if (!bands || !img || !ctx) return;
-      renderLupton(bands, params, img.data, true);
-      ctx.putImageData(img, 0, 0);
-    });
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [status, params]);
+    requestFrame({ minimum: params.minimum, stretch: params.stretch, q: params.q });
+  }, [status, params.minimum, params.stretch, params.q, requestFrame]);
 
   // Detection outlines: the 1-bit mask PNG, recoloured to the accent with alpha from its luminance.
   useEffect(() => {
@@ -222,7 +265,7 @@ export default function Viewer({
     <div className="flex min-h-svh flex-col">
       <header className="relative z-10 border-b border-rule bg-ink/80 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-8">
-          <Logo compact />
+          <Logo />
           <nav aria-label="Targets" className="order-3 flex w-full flex-wrap gap-2 md:order-none md:w-auto">
             {tabs.map((t) => {
               const current = t.slug === manifest.slug;

@@ -328,22 +328,10 @@ h3 {
     box-shadow 0.5s;
   will-change: transform;
 }
-.tilt-inner::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgb(240 215 170 / 0.18), transparent 60%);
-  opacity: 0;
-  transition: opacity 0.4s;
-}
 .tilt:hover .tilt-inner {
   box-shadow:
     0 30px 70px rgb(0 0 0 / 0.7),
     0 0 0 1px rgb(224 190 134 / 0.35);
-}
-.tilt:hover .tilt-inner::after {
-  opacity: 1;
 }
 
 /* ---------- Viewer controls ---------- */

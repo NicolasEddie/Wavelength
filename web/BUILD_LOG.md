@@ -86,3 +86,15 @@ Tailwind, Vercel) for a final interview on 27 Oct. UI redesign only, no new pipe
 ### Problems found and fixed
 - Custom button classes overrode Tailwind utilities (unlayered CSS wins over `@layer utilities`), which
   stretched the Replay button. Moved them into `@layer components`.
+
+## Session 3 — 22 Oct 2026: checkpoint 2, round 2
+
+- **Meteors too rare to demo:** now every 12–22 s (first one 5 s after load), 30% slower, and the whole
+  streak is clickable within 60 px rather than just the head.
+- **Toolbar warning while dragging sliders:** the Vercel Toolbar (shown only to signed-in team members on
+  previews) flags slow interactions. Rendering ran on the main thread, so each slider move blocked the next
+  paint. Moved band decoding and rendering into a Web Worker (`lib/render.worker.ts`); the page only paints
+  finished frames and coalesces input to the newest value. Main-thread fallback kept for browsers without
+  workers. Same `lupton.ts`, so the verification still covers it.
+- **Viewer logo:** wordmark restored next to the mark.
+- **Gallery cards:** removed the cursor-following highlight ("flashlight"); the tilt and lift remain.

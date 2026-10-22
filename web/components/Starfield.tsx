@@ -23,8 +23,10 @@ const PUSH_RADIUS = 110;
 const PUSH_DISTANCE = 7;
 const PUSH_BRIGHTEN = 0.6;
 
-const METEOR_MIN_MS = 45_000;
-const METEOR_MAX_MS = 80_000;
+const METEOR_MIN_MS = 12_000;
+const METEOR_MAX_MS = 22_000;
+const FIRST_METEOR_MS = 5_000;
+const METEOR_HIT_RADIUS = 60; // px around the head or anywhere along the tail
 
 interface Star {
   x: number; y: number; z: number; r: number; a: number; glow: boolean;
@@ -202,8 +204,8 @@ export default function Starfield() {
       const sx = fromLeft ? W * (0.05 + Math.random() * 0.4) : W * (0.55 + Math.random() * 0.4);
       const sy0 = H * (0.05 + Math.random() * 0.3);
       const ang = 0.35 + Math.random() * 0.25;
-      const sp = Math.max(W, 900) / 1.9;
-      meteors.push({ x: sx, y: sy0, vx: (fromLeft ? 1 : -1) * Math.cos(ang) * sp, vy: Math.sin(ang) * sp, life: 0, max: 2.2, dead: false });
+      const sp = Math.max(W, 900) / 2.8; // slow enough to aim at
+      meteors.push({ x: sx, y: sy0, vx: (fromLeft ? 1 : -1) * Math.cos(ang) * sp, vy: Math.sin(ang) * sp, life: 0, max: 3.2, dead: false });
     };
 
     const drawMeteors = (dt: number) => {
@@ -278,7 +280,16 @@ export default function Starfield() {
       }
     };
 
-    const hitMeteor = (x: number, y: number) => meteors.find((m) => !m.dead && Math.hypot(m.x - x, m.y - y) < 34);
+    /** Distance from a point to the meteor's head-to-tail segment, so the whole streak is clickable. */
+    const hitMeteor = (x: number, y: number) =>
+      meteors.find((m) => {
+        if (m.dead) return false;
+        const n = Math.hypot(m.vx, m.vy);
+        const tx = m.x - (m.vx / n) * 150, ty = m.y - (m.vy / n) * 150;
+        const dx = m.x - tx, dy = m.y - ty;
+        const t = Math.max(0, Math.min(1, ((x - tx) * dx + (y - ty) * dy) / (dx * dx + dy * dy)));
+        return Math.hypot(x - (tx + dx * t), y - (ty + dy * t)) < METEOR_HIT_RADIUS;
+      });
 
     const catchMeteor = (m: Meteor) => {
       m.dead = true;
@@ -344,7 +355,10 @@ export default function Starfield() {
       frame(0);
     } else {
       raf = requestAnimationFrame(frame);
-      scheduleMeteor();
+      meteorTimer = window.setTimeout(() => {
+        spawnMeteor();
+        scheduleMeteor();
+      }, FIRST_METEOR_MS);
     }
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onScroll, { passive: true });
