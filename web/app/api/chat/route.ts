@@ -139,7 +139,9 @@ export async function POST(req: Request) {
     return textStream(mockAnswer(messages[messages.length - 1].content, ctx));
   }
 
-  const client = new Anthropic();
+  // An organisation-level key also needs the workspace to bill; a workspace-scoped key needs nothing extra.
+  const workspace = process.env.ANTHROPIC_WORKSPACE_ID;
+  const client = new Anthropic(workspace ? { defaultHeaders: { "anthropic-workspace-id": workspace } } : {});
   const stream = client.messages.stream({
     model: MODEL,
     max_tokens: MAX_ANSWER_TOKENS,
@@ -163,7 +165,7 @@ export async function POST(req: Request) {
         : status === 429 || status === 529
           ? "The assistant is busy right now. Please try again in a moment."
           : "Something went wrong answering that. Please try again.";
-    return Response.json({ error: message, code: status, detail: status === 400 ? String((err as Error).message).slice(0, 300) : undefined }, { status: status >= 500 ? 502 : status === 429 ? 429 : 500 });
+    return Response.json({ error: message, code: status }, { status: status >= 500 ? 502 : status === 429 ? 429 : 500 });
   }
 
   async function* answer() {

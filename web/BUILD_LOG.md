@@ -146,3 +146,10 @@ Scoped in a grill round before Nico left; built while he was away; pushed to the
     phone dock); side panel on desktop, slide-up sheet on phones; starter questions per page and target;
     disclosure line; Escape closes. Hidden everywhere when no key is configured.
   - Tested locally against a stand-in answer mode (`CHAT_MOCK=1`, never set on Vercel).
+
+### Problems found and fixed (session 6)
+- **Chat failed on the first real request** (every answer cut off after ~0.2 s). The stream hid the cause, so
+  the route now waits for the first API event before responding: errors return a real status and are logged.
+  The cause was an organisation-level API key, which the API accepts only with an `anthropic-workspace-id`
+  header. The route now sends that header when `ANTHROPIC_WORKSPACE_ID` is set; a workspace-scoped key
+  works with no extra setting. Needs one setting change from Nico before real answers flow.
