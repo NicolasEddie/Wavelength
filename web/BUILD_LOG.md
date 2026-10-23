@@ -152,4 +152,4 @@ Scoped in a grill round before Nico left; built while he was away; pushed to the
   the route now waits for the first API event before responding: errors return a real status and are logged.
   The cause was an organisation-level API key, which the API accepts only with an `anthropic-workspace-id`
   header. The route now sends that header when `ANTHROPIC_WORKSPACE_ID` is set; a workspace-scoped key
-  works with no extra setting. Needs one setting change from Nico before real answers flow.
+  works with no extra setting. Nico replaced the key with a workspace-scoped one in Vercel; redeployed.
