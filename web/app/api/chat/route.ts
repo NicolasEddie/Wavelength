@@ -140,17 +140,46 @@ export async function POST(req: Request) {
   }
 
   const client = new Anthropic();
-  const history = messages;
+  const stream = client.messages.stream({
+    model: MODEL,
+    max_tokens: MAX_ANSWER_TOKENS,
+    system: buildSystemPrompt(ctx),
+    messages,
+    output_config: { effort: "low" },
+  });
+  const events = stream[Symbol.asyncIterator]();
+
+  // Wait for the first event before answering, so API errors (bad key, overload, bad request)
+  // return a real status and a clear message instead of a broken stream.
+  let first: IteratorResult<Anthropic.MessageStreamEvent>;
+  try {
+    first = await events.next();
+  } catch (err) {
+    const status = (err as { status?: number }).status ?? 500;
+    console.error("[chat] Anthropic API error", status, (err as Error).message);
+    const message =
+      status === 401 || status === 403
+        ? "Chat isn't configured correctly right now."
+        : status === 429 || status === 529
+          ? "The assistant is busy right now. Please try again in a moment."
+          : "Something went wrong answering that. Please try again.";
+    return Response.json({ error: message, code: status }, { status: status >= 500 ? 502 : status === 429 ? 429 : 500 });
+  }
+
   async function* answer() {
-    const stream = client.messages.stream({
-      model: MODEL,
-      max_tokens: MAX_ANSWER_TOKENS,
-      system: buildSystemPrompt(ctx),
-      messages: history,
-      output_config: { effort: "low" },
-    });
-    for await (const event of stream) {
-      if (event.type === "content_block_delta" && event.delta.type === "text_delta") yield event.delta.text;
+    const handle = (ev: Anthropic.MessageStreamEvent) =>
+      ev.type === "content_block_delta" && ev.delta.type === "text_delta" ? ev.delta.text : "";
+    if (!first.done) yield handle(first.value);
+    try {
+      for (;;) {
+        const next = await events.next();
+        if (next.done) break;
+        const text = handle(next.value);
+        if (text) yield text;
+      }
+    } catch (err) {
+      console.error("[chat] stream interrupted", (err as Error).message);
+      throw err;
     }
   }
   return textStream(answer());
