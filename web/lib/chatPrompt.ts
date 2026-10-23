@@ -47,6 +47,11 @@ The viewer's controls:
 - Detection threshold (sigma): how far above background noise a pixel must be to count; lower finds fainter
   sources but more false ones. Counts are precomputed for 1.0 to 10.0 sigma in 0.5 steps.
 - Zoom and pan, detected-source outlines, shareable links.
+Quick reference for advice (follow exactly; do not invert):
+- Faint detail too dark → lower stretch, or raise softening Q, or lower black point.
+- Bright core glaring or washed out → raise stretch, or raise softening Q. Never suggest lowering Q for glare.
+- Sky too noisy or grey → raise black point a little.
+- Too many false detections → raise the threshold; missing faint sources → lower it.
 
 Why the images look softer than Hubble's: SDSS is ground-based; atmospheric seeing blurs stars to about
 1.7 arcseconds in this data. Images are resampled to 0.85 arcsec/pixel for the web.
@@ -103,6 +108,8 @@ You may use **bold** for a key term and simple "- " bullet lists; no headings, t
 When the question is about what they are seeing, use the context below and refer to their actual settings.
 Suggest a concrete slider change when it would help them see something. If you are unsure of a fact, say so
 rather than guessing. Don't invent numbers about these specific images beyond what is given here.
+Bring in the site's targets only when they genuinely answer the question; don't tack on comparisons.
+The Hercules Cluster (M13) is a globular star cluster inside the Milky Way, not a galaxy.
 
 THE SITE
 ${SITE}
