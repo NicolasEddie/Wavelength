@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import HeroMerge from "@/components/HeroMerge";
+import HeroScroll from "@/components/HeroScroll";
 import Reveal from "@/components/Reveal";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { readManifest } from "@/lib/data";
@@ -33,42 +33,11 @@ export default function Home() {
 
   return (
     <>
-      <div className="flex min-h-svh flex-col">
-        <SiteHeader />
-        <section className="flex flex-1 flex-col justify-center">
-          <div className="container-wide flex flex-col gap-10 pb-6 pt-2 lg:flex-row lg:items-center lg:gap-[clamp(48px,4vw,80px)]">
-            <div className="flex max-w-[460px] flex-none flex-col items-start gap-7 lg:w-[clamp(340px,26vw,460px)]">
-              <p className="text-xs uppercase tracking-[0.14em] text-accent">Multi-filter astronomical imaging</p>
-              <h1 className="font-display text-[clamp(40px,3.7vw,76px)] font-normal leading-[1.02] tracking-[-0.01em]">
-                Telescopes see in grey. <em className="text-accent">Colour</em> is assembled.
-              </h1>
-              <p className="text-[clamp(16px,1vw,19px)] leading-relaxed text-muted">
-                Wavelength rebuilds colour images from real Sloan Digital Sky Survey exposures, one filter at a time, then
-                lets you take the controls an astronomer would.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/targets/m51" className="btn btn-primary">
-                  Explore the galaxies
-                </Link>
-                <Link href="#how" className="btn btn-ghost">
-                  How it works
-                </Link>
-              </div>
-            </div>
-            <div className="min-w-0 flex-1">
-              <HeroMerge />
-            </div>
-          </div>
-        </section>
-        <a
-          href="#about"
-          className="mx-auto flex flex-col items-center gap-1.5 pb-5 text-xs uppercase tracking-[0.14em] text-muted no-underline hover:text-fg"
-        >
-          Scroll
-          <svg className="cue-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <path d="M3 5l4 4 4-4" />
-          </svg>
-        </a>
+      <div className="relative">
+        <div className="absolute inset-x-0 top-0 z-20">
+          <SiteHeader />
+        </div>
+        <HeroScroll />
       </div>
 
       <main>

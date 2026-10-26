@@ -79,6 +79,32 @@ h3 {
   will-change: transform, width;
   mix-blend-mode: plus-lighter;
 }
+.hero-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: radial-gradient(closest-side, #000 0%, rgba(0, 0, 0, 0.94) 42%, rgba(0, 0, 0, 0.6) 68%, rgba(0, 0, 0, 0.2) 86%, transparent 100%);
+}
+/* Fade image edges into the black glow, so the frames have no hard border. */
+.hero-frame img,
+.hero-soft {
+  border-radius: 0;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent),
+    linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent),
+    linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  mask-composite: intersect;
+}
+.hero-intro {
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.85);
+}
+.hero-caption {
+  will-change: opacity, transform;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.9);
+}
 .merge-frame img {
   position: absolute;
   inset: 0;
