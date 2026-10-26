@@ -23,10 +23,30 @@ const FRAMES = [
 ];
 
 const STEPS = [
-  { title: "Three exposures", body: "One greyscale frame per filter: SDSS i, r and g. A telescope camera only counts light, so each frame has no colour of its own.", from: 0.1, to: 0.36 },
-  { title: "Assign channels", body: "Longest wavelength to red, shortest to blue, so the colours keep the order of the spectrum.", from: 0.36, to: 0.56 },
-  { title: "Align on the sky", body: "Each frame is reprojected onto one grid, so a pixel is the same patch of sky in every channel and the light adds up.", from: 0.56, to: 0.78 },
-  { title: "Stretch into colour", body: "An asinh stretch compresses a core thousands of times brighter than the arms, keeping the true colour balance.", from: 0.78, to: 1.01 },
+  {
+    title: "Three exposures",
+    body: "One greyscale frame per filter: SDSS i, r and g. A telescope camera only counts light, so each frame has no colour of its own.",
+    from: 0.1,
+    to: 0.36,
+  },
+  {
+    title: "Assign channels",
+    body: "Longest wavelength to red, shortest to blue, so the colours keep the order of the spectrum.",
+    from: 0.36,
+    to: 0.56,
+  },
+  {
+    title: "Align on the sky",
+    body: "Each frame is reprojected onto one grid, so a pixel is the same patch of sky in every channel and the light adds up.",
+    from: 0.56,
+    to: 0.78,
+  },
+  {
+    title: "Stretch into colour",
+    body: "An asinh stretch compresses a core thousands of times brighter than the arms, keeping the true colour balance.",
+    from: 0.78,
+    to: 1.01,
+  },
 ];
 
 // The merged frames sum to ~2.4x one grey frame (TINT_OTHER = 0.7 in scripts/make_hero_assets.py), and each
@@ -37,7 +57,8 @@ const clamp = (x: number, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 /** Eased 0→1 as p moves from a to b. */
-const span = (p: number, a: number, b: number) => smooth(clamp((p - a) / (b - a)));
+const span = (p: number, a: number, b: number) =>
+  smooth(clamp((p - a) / (b - a)));
 /** Fade in over the first `edge` of a window, out over the last `edge`. */
 const windowed = (p: number, a: number, b: number, edge = 0.035) =>
   Math.min(span(p, a, a + edge), 1 - span(p, b - edge, b));
@@ -79,7 +100,7 @@ export default function HeroScroll() {
       const fade = span(p, 0.8, 0.94);
       const size = lerp(s0, sF, conv);
       // Sit a little above centre so the bottom-left captions have room.
-      const cy = `${phone ? 40 : 47}%`;
+      const cy = `${phone ? 38 : 41}%`;
 
       if (introRef.current) {
         introRef.current.style.opacity = String(intro);
@@ -89,16 +110,23 @@ export default function HeroScroll() {
       if (cueRef.current) cueRef.current.style.opacity = String(intro);
       if (capsRef.current) capsRef.current.style.opacity = String(1 - intro);
       if (groupRef.current) {
-        groupRef.current.style.filter = sharpen < 1 ? `blur(${(1 - sharpen) * 14}px)` : "none";
+        groupRef.current.style.filter =
+          sharpen < 1 ? `blur(${(1 - sharpen) * 14}px)` : "none";
         groupRef.current.style.opacity = String(lerp(0.22, 1, sharpen));
       }
       if (glowRef.current) {
-        // Black directly behind the images, fading out to the starfield at the edges.
-        const gw = lerp(s0 * 3 + gap * 2, sF, conv) * 0.78 + 140;
-        const gh = lerp(s0, sF, conv) * 0.78 + 140;
-        glowRef.current.style.width = `${gw * 1.5}px`;
-        glowRef.current.style.height = `${gh * 1.6}px`;
-        glowRef.current.style.top = cy;
+        // One soft, rounded black field behind all three frames, shrinking to hug the composite.
+        const pad = s0 * 0.16;
+        const w = lerp(s0 * 3 + gap * 2, sF, conv) + pad * 2;
+        const h = lerp(s0 + 30, sF, conv) + pad * 2; // +30: room for the filter labels
+        const g = glowRef.current;
+        g.style.width = `${w}px`;
+        g.style.height = `${h}px`;
+        g.style.borderRadius = `${Math.min(w, h) * 0.3}px`;
+        g.style.filter = `blur(${Math.round(s0 * 0.14)}px)`;
+        g.style.top = cy;
+        g.style.transform = "translate(-50%, -50%)";
+        g.style.opacity = String(lerp(0.75, 1, sharpen));
       }
       frameRefs.current.forEach((f, i) => {
         if (!f) return;
@@ -106,7 +134,9 @@ export default function HeroScroll() {
         f.style.width = `${size}px`;
         f.style.top = cy;
         f.style.transform = `translate(-50%, -50%) translateX(${x}px)`;
-        f.style.opacity = String((1 - fade * 0.92) * lerp(1, MERGED_OPACITY, conv));
+        f.style.opacity = String(
+          (1 - fade * 0.92) * lerp(1, MERGED_OPACITY, conv),
+        );
         const [grey, tinted, tag] = f.children as unknown as HTMLElement[];
         grey.style.opacity = String(1 - tint);
         tinted.style.opacity = String(tint);
@@ -124,7 +154,8 @@ export default function HeroScroll() {
         c.style.opacity = String(o);
         c.style.transform = `translateY(${(1 - o) * (p < s.from + 0.05 ? 14 : -14)}px)`;
       });
-      if (barRef.current) barRef.current.style.transform = `scaleX(${span(p, 0.1, 0.95)})`;
+      if (barRef.current)
+        barRef.current.style.transform = `scaleX(${span(p, 0.1, 0.95)})`;
     };
 
     const schedule = () => {
@@ -141,7 +172,11 @@ export default function HeroScroll() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative h-[520svh]" aria-label="How a colour image is built">
+    <section
+      ref={sectionRef}
+      className="relative h-[520svh]"
+      aria-label="How a colour image is built"
+    >
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={glowRef} className="hero-glow" aria-hidden="true" />
 
@@ -152,9 +187,19 @@ export default function HeroScroll() {
           aria-label="Three greyscale filter exposures of the Whirlpool Galaxy are tinted red, green and blue, aligned, and combined into one colour image"
         >
           {FRAMES.map((f, i) => (
-            <div key={f.key} ref={(el) => { frameRefs.current[i] = el; }} className="merge-frame hero-frame">
+            <div
+              key={f.key}
+              ref={(el) => {
+                frameRefs.current[i] = el;
+              }}
+              className="merge-frame hero-frame"
+            >
               <img src={`/hero/m51-${f.key}-grey.webp`} alt="" />
-              <img src={`/hero/m51-${f.key}-tint.webp`} alt="" style={{ opacity: 0 }} />
+              <img
+                src={`/hero/m51-${f.key}-tint.webp`}
+                alt=""
+                style={{ opacity: 0 }}
+              />
               <span className="absolute inset-x-0 top-[calc(100%+12px)] whitespace-nowrap text-center text-[11px] tracking-[0.08em] text-muted sm:text-xs">
                 {f.label}
               </span>
@@ -169,55 +214,94 @@ export default function HeroScroll() {
           />
         </div>
 
-        {/* Intro: the headline over the faint frames. */}
-        <div ref={introRef} className="absolute inset-0 z-[2] grid place-items-center px-5">
-          <div className="hero-intro flex max-w-[860px] flex-col items-center gap-6 text-center">
-            <p className="text-xs uppercase tracking-[0.14em] text-accent">Multi-filter astronomical imaging</p>
-            <h1 className="font-display text-[clamp(44px,5.4vw,96px)] font-normal leading-[1.0] tracking-[-0.01em] [text-wrap:balance]">
-              Telescopes see in grey. <em className="text-accent">Colour</em> is assembled.
-            </h1>
-            <p className="max-w-[34em] text-[clamp(16px,1.1vw,20px)] leading-relaxed text-soft">
-              Wavelength rebuilds colour images from real Sloan Digital Sky Survey exposures, one filter at a time,
-              then lets you take the controls an astronomer would.
-            </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/targets/m51" className="btn btn-primary">
-                Explore the galaxies
-              </Link>
-              <Link href="#how" className="btn btn-ghost">
-                How it works
-              </Link>
+        {/* Intro: the headline, left-aligned on the same edge the step captions take over. */}
+        <div
+          ref={introRef}
+          className="absolute inset-x-0 bottom-[max(40px,9svh)] z-[2]"
+        >
+          <div className="container-wide">
+            <div className="hero-intro flex max-w-[640px] flex-col items-start gap-6">
+              <p className="text-xs uppercase tracking-[0.14em] text-accent">
+                Multi-filter astronomical imaging
+              </p>
+              <h1 className="font-display text-[clamp(44px,4.8vw,88px)] font-normal leading-[1.0] tracking-[-0.01em] [text-wrap:balance]">
+                Telescopes see in grey. <em className="text-accent">Colour</em>{" "}
+                is assembled.
+              </h1>
+              <p className="max-w-[32em] text-[clamp(16px,1.1vw,20px)] leading-relaxed text-soft">
+                Wavelength rebuilds colour images from real Sloan Digital Sky
+                Survey exposures, one filter at a time, then lets you take the
+                controls an astronomer would.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/targets/m51" className="btn btn-primary">
+                  Explore the galaxies
+                </Link>
+                <Link href="#how" className="btn btn-ghost">
+                  How it works
+                </Link>
+              </div>
             </div>
           </div>
         </div>
 
-        <div ref={cueRef} className="absolute inset-x-0 bottom-5 z-[2] flex flex-col items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-muted" aria-hidden="true">
+        <div
+          ref={cueRef}
+          className="absolute inset-x-0 bottom-5 z-[2] flex flex-col items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-muted"
+          aria-hidden="true"
+        >
           Scroll
-          <svg className="cue-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg
+            className="cue-arrow"
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
             <path d="M3 5l4 4 4-4" />
           </svg>
         </div>
 
         {/* Step captions, bottom left; each fades in for its part of the scroll. */}
-        <div ref={capsRef} style={{ opacity: 0 }} className="pointer-events-none absolute bottom-[max(28px,5svh)] left-[max(20px,3vw)] z-[2] w-[min(380px,calc(100vw-40px))]">
-          <div className="relative min-h-[150px]">
-            {STEPS.map((s, i) => (
-              <div
-                key={s.title}
-                ref={(el) => { capRefs.current[i] = el; }}
-                className="hero-caption absolute inset-x-0 bottom-0 flex flex-col gap-2"
-                style={{ opacity: 0 }}
-              >
-                <span className="text-xs uppercase tracking-[0.14em] text-accent">
-                  Step {i + 1} of {STEPS.length}
-                </span>
-                <h2 className="font-display text-[clamp(30px,2.4vw,42px)] font-normal leading-[1.05]">{s.title}</h2>
-                <p className="text-[15px] leading-relaxed text-soft">{s.body}</p>
+        <div
+          ref={capsRef}
+          style={{ opacity: 0 }}
+          className="pointer-events-none absolute inset-x-0 bottom-[max(40px,9svh)] z-[2]"
+        >
+          <div className="container-wide">
+            <div className="w-full max-w-[560px]">
+              <div className="relative min-h-[190px]">
+                {STEPS.map((s, i) => (
+                  <div
+                    key={s.title}
+                    ref={(el) => {
+                      capRefs.current[i] = el;
+                    }}
+                    className="hero-caption absolute inset-x-0 bottom-0 flex flex-col gap-3"
+                    style={{ opacity: 0 }}
+                  >
+                    <span className="text-xs uppercase tracking-[0.14em] text-accent">
+                      Step {i + 1} of {STEPS.length}
+                    </span>
+                    <h2 className="font-display text-[clamp(38px,3.6vw,64px)] font-normal leading-[1.0] tracking-[-0.01em]">
+                      {s.title}
+                    </h2>
+                    <p className="max-w-[32em] text-[clamp(16px,1.1vw,20px)] leading-relaxed text-soft">
+                      {s.body}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="mt-4 h-px w-full bg-rule-hi">
-            <div ref={barRef} className="h-px w-full origin-left bg-accent" style={{ transform: "scaleX(0)" }} />
+              <div className="mt-4 h-px w-full bg-rule-hi">
+                <div
+                  ref={barRef}
+                  className="h-px w-full origin-left bg-accent"
+                  style={{ transform: "scaleX(0)" }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
