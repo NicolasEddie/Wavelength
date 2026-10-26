@@ -4,16 +4,18 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 /**
- * Scroll-driven hero. The section is several screens tall; its stage sticks to the viewport while
- * scroll progress p (0 → 1) drives the animation, so scrolling back up plays it in reverse.
+ * Scroll-driven hero, in five stages. The section is several screens tall and its stage sticks to the
+ * viewport. Scroll position only picks the stage; crossing a threshold plays that whole transition on a
+ * timer, so the page never rests half-way between two states (no half-faded text or half-merged frames).
+ * Scrolling back up plays the same transitions in reverse.
  *
- *   0.00–0.12  intro headline fades out, the faint blurred frames sharpen
- *   0.12–0.36  "Three exposures"  (frames side by side, greyscale)
- *   0.36–0.56  "Assign channels"  (frames tint red, green, blue)
- *   0.56–0.78  "Align on the sky" (frames slide together and grow; light adds up)
- *   0.78–1.00  "Stretch into colour" (the true composite fades in, then holds)
+ *   0  intro headline, frames faint and blurred
+ *   1  "Three exposures"      frames sharp, greyscale, side by side
+ *   2  "Assign channels"      frames tinted red, green, blue
+ *   3  "Align on the sky"     frames slid together and enlarged; their light adds up
+ *   4  "Stretch into colour"  the true composite
  *
- * Styles are written straight to the DOM on each animation frame; React never re-renders while scrolling.
+ * Image styles are written straight to the DOM each animation frame; text switches with CSS transitions.
  */
 
 const FRAMES = [
@@ -26,28 +28,25 @@ const STEPS = [
   {
     title: "Three exposures",
     body: "One greyscale frame per filter: SDSS i, r and g. A telescope camera only counts light, so each frame has no colour of its own.",
-    from: 0.1,
-    to: 0.36,
   },
   {
     title: "Assign channels",
     body: "Longest wavelength to red, shortest to blue, so the colours keep the order of the spectrum.",
-    from: 0.36,
-    to: 0.56,
   },
   {
     title: "Align on the sky",
     body: "Each frame is reprojected onto one grid, so a pixel is the same patch of sky in every channel and the light adds up.",
-    from: 0.56,
-    to: 0.78,
   },
   {
     title: "Stretch into colour",
     body: "An asinh stretch compresses a core thousands of times brighter than the arms, keeping the true colour balance.",
-    from: 0.78,
-    to: 1.01,
   },
 ];
+
+/** Scroll progress (0–1 through the section) at which each stage after the intro begins. */
+const STAGE_AT = [0.04, 0.27, 0.5, 0.73];
+/** Time for one stage-to-stage transition of the images. */
+const STEP_MS = 850;
 
 // The merged frames sum to ~2.4x one grey frame (TINT_OTHER = 0.7 in scripts/make_hero_assets.py), and each
 // frame is stretched brighter than the composite, so dim them as they converge.
@@ -56,12 +55,9 @@ const MERGED_OPACITY = 0.28;
 const clamp = (x: number, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-/** Eased 0→1 as p moves from a to b. */
-const span = (p: number, a: number, b: number) =>
-  smooth(clamp((p - a) / (b - a)));
-/** Fade in over the first `edge` of a window, out over the last `edge`. */
-const windowed = (p: number, a: number, b: number, edge = 0.035) =>
-  Math.min(span(p, a, a + edge), 1 - span(p, b - edge, b));
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+/** Eased 0→1 as v moves from a to b. */
+const span = (v: number, a: number, b: number) => smooth(clamp((v - a) / (b - a)));
 
 export default function HeroScroll() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -76,42 +72,39 @@ export default function HeroScroll() {
   const capsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let raf = 0;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let stage = -1; // stage chosen by scroll
+    let v = 0; // where the image animation is now, 0–4 (stage units)
+    let from = 0;
+    let to = 0;
+    let t0 = 0;
+    let dur = 0;
+    let anim = 0;
+    let scrollRaf = 0;
 
-    const render = () => {
-      raf = 0;
+    /** Draw the images at animation position v (0–4). */
+    const draw = () => {
       const section = sectionRef.current;
       if (!section) return;
-      const rect = section.getBoundingClientRect();
       const vh = window.innerHeight;
       const W = section.clientWidth;
-      const p = clamp(-rect.top / Math.max(1, rect.height - vh));
 
       // Geometry: three frames span most of the width; the composite ends large and centred.
       const phone = W < 640;
       const s0 = Math.min(W * (phone ? 0.3 : 0.29), vh * 0.6);
       const gap = W * (phone ? 0.02 : 0.025);
       const sF = Math.min(W * (phone ? 0.9 : 0.62), vh * 0.74);
-
-      const intro = 1 - span(p, 0.02, 0.1);
-      const sharpen = span(p, 0.03, 0.14);
-      const tint = span(p, 0.4, 0.52);
-      const conv = span(p, 0.58, 0.76);
-      const fade = span(p, 0.8, 0.94);
-      const size = lerp(s0, sF, conv);
       // Sit a little above centre so the bottom-left captions have room.
       const cy = `${phone ? 38 : 41}%`;
 
-      if (introRef.current) {
-        introRef.current.style.opacity = String(intro);
-        introRef.current.style.transform = `translateY(${(1 - intro) * -24}px)`;
-        introRef.current.style.pointerEvents = intro > 0.5 ? "auto" : "none";
-      }
-      if (cueRef.current) cueRef.current.style.opacity = String(intro);
-      if (capsRef.current) capsRef.current.style.opacity = String(1 - intro);
+      const sharpen = span(v, 0, 1);
+      const tint = span(v, 1, 2);
+      const conv = span(v, 2, 3);
+      const fade = span(v, 3, 4);
+      const size = lerp(s0, sF, conv);
+
       if (groupRef.current) {
-        groupRef.current.style.filter =
-          sharpen < 1 ? `blur(${(1 - sharpen) * 14}px)` : "none";
+        groupRef.current.style.filter = sharpen < 1 ? `blur(${(1 - sharpen) * 14}px)` : "none";
         groupRef.current.style.opacity = String(lerp(0.22, 1, sharpen));
       }
       if (glowRef.current) {
@@ -134,40 +127,74 @@ export default function HeroScroll() {
         f.style.width = `${size}px`;
         f.style.top = cy;
         f.style.transform = `translate(-50%, -50%) translateX(${x}px)`;
-        f.style.opacity = String(
-          (1 - fade * 0.92) * lerp(1, MERGED_OPACITY, conv),
-        );
+        f.style.opacity = String((1 - fade * 0.92) * lerp(1, MERGED_OPACITY, conv));
         const [grey, tinted, tag] = f.children as unknown as HTMLElement[];
         grey.style.opacity = String(1 - tint);
         tinted.style.opacity = String(tint);
-        tag.style.opacity = String(sharpen * (1 - span(p, 0.56, 0.64)));
+        tag.style.opacity = String(sharpen * (1 - span(v, 2, 2.35)));
       });
       if (compRef.current) {
         compRef.current.style.width = `${sF}px`;
         compRef.current.style.top = cy;
         compRef.current.style.opacity = String(fade);
       }
-      capRefs.current.forEach((c, i) => {
-        if (!c) return;
-        const s = STEPS[i];
-        const o = windowed(p, s.from, s.to);
-        c.style.opacity = String(o);
-        c.style.transform = `translateY(${(1 - o) * (p < s.from + 0.05 ? 14 : -14)}px)`;
-      });
-      if (barRef.current)
-        barRef.current.style.transform = `scaleX(${span(p, 0.1, 0.95)})`;
     };
 
-    const schedule = () => {
-      if (!raf) raf = requestAnimationFrame(render);
+    const tick = (now: number) => {
+      const k = dur ? clamp((now - t0) / dur) : 1;
+      v = lerp(from, to, easeInOut(k));
+      draw();
+      anim = k < 1 ? requestAnimationFrame(tick) : 0;
     };
-    render();
+
+    /** Switch the text immediately (CSS fades it) and play the images to the new stage. */
+    const setStage = (next: number) => {
+      stage = next;
+      introRef.current?.setAttribute("data-on", next === 0 ? "1" : "0");
+      cueRef.current?.setAttribute("data-on", next === 0 ? "1" : "0");
+      capsRef.current?.setAttribute("data-on", next > 0 ? "1" : "0");
+      capRefs.current.forEach((c, i) => c?.setAttribute("data-on", next === i + 1 ? "1" : "0"));
+      if (barRef.current) barRef.current.style.transform = `scaleX(${next / STEPS.length})`;
+
+      cancelAnimationFrame(anim);
+      from = v;
+      to = next;
+      // One full step takes STEP_MS; skipping several stages at once is quicker per step.
+      dur = reduced ? 0 : Math.min(STEP_MS * Math.abs(to - from), STEP_MS * 1.6);
+      t0 = performance.now();
+      anim = requestAnimationFrame(tick);
+    };
+
+    const onScroll = () => {
+      scrollRaf = 0;
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const p = clamp(-rect.top / Math.max(1, rect.height - window.innerHeight));
+      const next = STAGE_AT.filter((at) => p >= at).length;
+      if (next !== stage) setStage(next);
+    };
+    const schedule = () => {
+      if (!scrollRaf) scrollRaf = requestAnimationFrame(onScroll);
+    };
+    const onResize = () => {
+      draw();
+      schedule();
+    };
+
+    // Start in whatever stage the page loaded at (e.g. after a reload part-way down), without animating.
+    onScroll();
+    v = to = stage;
+    cancelAnimationFrame(anim);
+    draw();
+
     window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
+    window.addEventListener("resize", onResize);
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(anim);
+      cancelAnimationFrame(scrollRaf);
       window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
@@ -217,7 +244,8 @@ export default function HeroScroll() {
         {/* Intro: the headline, left-aligned on the same edge the step captions take over. */}
         <div
           ref={introRef}
-          className="absolute inset-x-0 bottom-[max(40px,9svh)] z-[2]"
+          data-on="1"
+          className="hero-swap absolute inset-x-0 bottom-[max(40px,9svh)] z-[2]"
         >
           <div className="container-wide">
             <div className="hero-intro flex max-w-[640px] flex-col items-start gap-6">
@@ -245,9 +273,7 @@ export default function HeroScroll() {
           </div>
         </div>
 
-        <div
-          ref={cueRef}
-          className="absolute inset-x-0 bottom-5 z-[2] flex flex-col items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-muted"
+        <div ref={cueRef} data-on="1" className="hero-swap absolute inset-x-0 bottom-5 z-[2] flex flex-col items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-muted"
           aria-hidden="true"
         >
           Scroll
@@ -265,10 +291,7 @@ export default function HeroScroll() {
         </div>
 
         {/* Step captions, bottom left; each fades in for its part of the scroll. */}
-        <div
-          ref={capsRef}
-          style={{ opacity: 0 }}
-          className="pointer-events-none absolute inset-x-0 bottom-[max(40px,9svh)] z-[2]"
+        <div ref={capsRef} data-on="0" className="hero-fade pointer-events-none absolute inset-x-0 bottom-[max(40px,9svh)] z-[2]"
         >
           <div className="container-wide">
             <div className="w-full max-w-[560px]">
@@ -279,8 +302,7 @@ export default function HeroScroll() {
                     ref={(el) => {
                       capRefs.current[i] = el;
                     }}
-                    className="hero-caption absolute inset-x-0 bottom-0 flex flex-col gap-3"
-                    style={{ opacity: 0 }}
+                    data-on="0" className="hero-caption hero-swap absolute inset-x-0 bottom-0 flex flex-col gap-3"
                   >
                     <span className="text-xs uppercase tracking-[0.14em] text-accent">
                       Step {i + 1} of {STEPS.length}
@@ -297,7 +319,7 @@ export default function HeroScroll() {
               <div className="mt-4 h-px w-full bg-rule-hi">
                 <div
                   ref={barRef}
-                  className="h-px w-full origin-left bg-accent"
+                  className="h-px w-full origin-left bg-accent transition-transform duration-700 ease-out"
                   style={{ transform: "scaleX(0)" }}
                 />
               </div>

@@ -24,7 +24,7 @@ const eslintConfig = [
   {
     // The hero animation and viewer draw pre-sized WebP assets with CSS transforms and
     // blend modes; next/image's wrapper and resizing add nothing there.
-    files: ["components/HeroMerge.tsx", "components/viewer/Viewer.tsx"],
+    files: ["components/HeroMerge.tsx", "components/HeroScroll.tsx", "components/viewer/Viewer.tsx"],
     rules: { "@next/next/no-img-element": "off" },
   },
 ];

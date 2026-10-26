@@ -101,8 +101,35 @@ h3 {
 .hero-intro {
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.85);
 }
+/* Hero text switches whole: the outgoing block leaves quickly, the incoming one follows. */
+.hero-swap {
+  transition: opacity 0.22s ease-in, transform 0.22s ease-in, visibility 0s linear 0.22s;
+}
+.hero-swap[data-on="0"] {
+  opacity: 0;
+  transform: translateY(-14px);
+  visibility: hidden;
+  pointer-events: none;
+}
+.hero-swap[data-on="1"] {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  transition: opacity 0.45s ease-out 0.2s, transform 0.45s ease-out 0.2s, visibility 0s;
+}
+.hero-fade {
+  transition: opacity 0.3s ease;
+}
+.hero-fade[data-on="0"] {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-swap,
+  .hero-swap[data-on="1"] {
+    transition: none;
+  }
+}
 .hero-caption {
-  will-change: opacity, transform;
   text-shadow: 0 1px 18px rgba(0, 0, 0, 0.9);
 }
 .merge-frame img {
