@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 /**
  * The Wavelength mark: three filter dots (i, r, g as red, green, blue) sitting on
@@ -42,8 +45,17 @@ export function Mark({ className = "" }: { className?: string }) {
 
 /** Mark plus wordmark. `compact` shows the mark alone (viewer header, phones). */
 export default function Logo({ compact = false }: { compact?: boolean }) {
+  const pathname = usePathname();
+  // Already on the home page: glide back to the top (the hero plays back in reverse) instead of reloading.
+  const onClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname !== "/" || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+    if (window.location.hash) history.replaceState(null, "", "/");
+  };
   return (
-    <Link href="/" className="brand inline-flex items-center gap-3 text-fg no-underline hover:text-fg" aria-label="Wavelength home">
+    <Link href="/" onClick={onClick} className="brand inline-flex items-center gap-3 text-fg no-underline hover:text-fg" aria-label="Wavelength home">
       <Mark />
       <span className={`font-display text-[28px] leading-none ${compact ? "sr-only" : "max-sm:sr-only"}`}>Wavelength</span>
     </Link>
