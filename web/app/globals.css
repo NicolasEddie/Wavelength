@@ -83,6 +83,23 @@ h3 {
 main [id] {
   scroll-margin-top: 96px;
 }
+.site-header {
+  position: relative;
+}
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: calc(100% + 36px);
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-ink) 92%, transparent) 0%,
+    color-mix(in srgb, var(--color-ink) 72%, transparent) 55%,
+    transparent 100%
+  );
+}
 .hero-glow {
   position: absolute;
   left: 50%;
