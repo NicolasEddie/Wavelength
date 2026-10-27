@@ -499,7 +499,7 @@ export default function Viewer({
             {sourcesSwitch("border-y border-rule py-3")}
           </div>
 
-          <div className="viewer-actions flex flex-wrap gap-3">
+          <div className={`viewer-actions flex flex-wrap gap-3 ${dockOpen ? "" : "max-lg:hidden"}`}>
             <button
               type="button"
               onClick={() => setParams(defaults)}
@@ -567,19 +567,38 @@ export default function Viewer({
             {sourcesSwitch("border-t border-rule pt-2")}
           </section>
         ) : (
-          <button
-            type="button"
-            onClick={() => setDockOpen(true)}
-            className="btn btn-primary pointer-events-auto ml-auto flex gap-2 shadow-[0_10px_30px_rgba(0,0,0,.6)]"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M2 4h12M2 8h12M2 12h12" />
-              <circle cx="5" cy="4" r="1.6" fill="currentColor" />
-              <circle cx="10" cy="8" r="1.6" fill="currentColor" />
-              <circle cx="7" cy="12" r="1.6" fill="currentColor" />
-            </svg>
-            Adjust image
-          </button>
+          // Dock hidden: Reset and Copy link ride along with "Adjust image" (the in-page copies are hidden),
+          // so the floating button never sits on top of them.
+          <div className="pointer-events-auto mx-auto flex max-w-xl items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setParams(defaults)}
+              disabled={isDefault}
+              className="btn btn-ghost bg-ink/90 px-4 text-sm ring-1 ring-rule-hi shadow-[0_10px_30px_rgba(0,0,0,.6)] backdrop-blur-md"
+            >
+              Reset
+            </button>
+            <button
+              type="button"
+              onClick={copyLink}
+              className="btn btn-ghost bg-ink/90 whitespace-nowrap px-4 text-sm ring-1 ring-rule-hi shadow-[0_10px_30px_rgba(0,0,0,.6)] backdrop-blur-md"
+            >
+              <span aria-live="polite">{copied === "done" ? "Copied" : copied === "failed" ? "Copy failed" : "Copy link"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setDockOpen(true)}
+              className="btn btn-primary flex gap-2 whitespace-nowrap shadow-[0_10px_30px_rgba(0,0,0,.6)]"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M2 4h12M2 8h12M2 12h12" />
+                <circle cx="5" cy="4" r="1.6" fill="currentColor" />
+                <circle cx="10" cy="8" r="1.6" fill="currentColor" />
+                <circle cx="7" cy="12" r="1.6" fill="currentColor" />
+              </svg>
+              Adjust image
+            </button>
+          </div>
         )}
       </div>
     </div>

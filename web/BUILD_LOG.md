@@ -153,3 +153,47 @@ Scoped in a grill round before Nico left; built while he was away; pushed to the
   The cause was an organisation-level API key, which the API accepts only with an `anthropic-workspace-id`
   header. The route now sends that header when `ANTHROPIC_WORKSPACE_ID` is set; a workspace-scoped key
   works with no extra setting. Nico replaced the key with a workspace-scoped one in Vercel; redeployed.
+
+## Session 7 — 26 Oct 2026: scroll-driven hero, sticky header, site-wide check
+
+Directed by Nico in short review rounds against the preview; each round below was one change and one look.
+
+### Hero
+- **New format:** the boxed card animation was replaced by a full-width, scroll-driven hero (`components/HeroScroll.tsx`).
+  The three frames span most of the screen with no frame of their own: one rounded black field fades out to
+  the starfield behind them, and image edges are masked so they dissolve into it.
+- **Text:** the headline sits bottom-left, on the same edge as the step captions that replace it, so the
+  intro reads as turning into the explanation. Captions are close to headline size.
+- **Stages, not scrubbing:** scrubbing the animation with the scrollbar left text half-faded and frames
+  half-merged wherever the visitor stopped. Scroll position now only picks one of five stages; the text
+  swaps with a quick crossfade, and the images follow the stage on a critically damped spring.
+- **Why a spring:** fixed-length eased tweens made a run through several stages (a fast scroll, or the logo's
+  glide to the top) play as separate steps with a pause between each. A spring keeps its momentum when the
+  target changes, so the reverse plays as one smooth motion. Speed is capped.
+- **Even spacing:** stages were unevenly spaced (the intro handed over after 0.2 screens, the last stage held for
+  1.3). All five now take the same ~1.1 screens of scroll, measured by stepping the wheel in 50 px increments.
+
+### Header and navigation
+- Sticky on every page, with a soft dark fade behind it (a solid bar was tried and rejected) so links stay
+  readable over scrolling text. One row on phones (the in-page links drop out).
+- The logo on the home page glides back to the top on a timer instead of reloading; any wheel, touch or key
+  input hands control back.
+- Anchor targets and the science page's contents list clear the sticky header.
+
+### Viewer
+- The "Ask" button toggles the chat panel and shows when it's open.
+- With the phone dock hidden, Reset and Copy link travel with the floating "Adjust image" button instead of
+  sitting underneath it.
+
+### Chat
+- The first live answers gave inverted slider advice (lowering softening for a glaring core) and tacked
+  unrelated targets onto answers. Added an explicit slider-direction reference to the prompt; re-tested.
+- The preview used a separate `ANTHROPIC_API_KEY` entry from production; both now hold the workspace-scoped key.
+
+### Site-wide check
+Every page at 1280×720, 1366×768, 1440×900, 1920×1080, tablet, phone and phone landscape; every link and control,
+hero forwards, backwards, after reload and resize, Back navigation, URL state including invalid values.
+No console errors, broken images or horizontal scrolling. Fixed: contents list under the header, floating chat
+button over footer links, Adjust image over Copy link, an unstyled 404 page (now on-brand with a way back),
+out-of-date docs and a build-log link to the preview branch. External links now open in a new tab. The old
+card hero and its styles were removed.

@@ -48,7 +48,7 @@ export default function Learn() {
         </div>
 
         <div className="flex flex-col gap-12 lg:flex-row lg:gap-20">
-          <nav aria-label="On this page" className="lg:sticky lg:top-8 lg:w-56 lg:flex-none lg:self-start">
+          <nav aria-label="On this page" className="lg:sticky lg:top-28 lg:w-56 lg:flex-none lg:self-start">
             <ol className="m-0 flex list-none flex-wrap gap-x-5 gap-y-2 p-0 text-sm lg:flex-col lg:gap-3">
               {SECTIONS.map((s, i) => (
                 <li key={s.id}>
@@ -187,15 +187,15 @@ export default function Learn() {
                 structured interview, compared two visual directions and an interactive motion prototype, then directed the
                 implementation, reviewing each deployed result. The decisions, checks and problems found along the way are
                 recorded in the{" "}
-                <a className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:text-accent-hi hover:decoration-accent" href="https://github.com/NicolasEddie/Wavelength/blob/redesign/web/BUILD_LOG.md">
+                <a className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:text-accent-hi hover:decoration-accent" href="https://github.com/NicolasEddie/Wavelength/blob/main/web/BUILD_LOG.md" target="_blank" rel="noopener noreferrer">
                   build log
                 </a>
                 .
               </p>
               <p>
                 Built with Next.js, React, Tailwind CSS and Vercel. Imagery from{" "}
-                <a className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:text-accent-hi hover:decoration-accent" href="https://www.sdss.org/">SDSS</a> via{" "}
-                <a className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:text-accent-hi hover:decoration-accent" href="https://skyview.gsfc.nasa.gov/">NASA SkyView</a>, used
+                <a className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:text-accent-hi hover:decoration-accent" href="https://www.sdss.org/" target="_blank" rel="noopener noreferrer">SDSS</a> via{" "}
+                <a className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors hover:text-accent-hi hover:decoration-accent" href="https://skyview.gsfc.nasa.gov/" target="_blank" rel="noopener noreferrer">NASA SkyView</a>, used
                 under CC-BY and the SDSS Image Use Policy.
               </p>
               <div>

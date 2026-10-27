@@ -162,57 +162,6 @@ main [id] {
   border-radius: 3px;
 }
 
-.stepper::before,
-.stepper::after {
-  content: "";
-  position: absolute;
-  left: 18px;
-  top: 13px;
-  height: 2px;
-  border-radius: 2px;
-}
-.stepper::before {
-  width: calc(75% + 8px);
-  background: var(--color-rule-hi);
-}
-.stepper::after {
-  width: calc((75% + 8px) * var(--prog, 0));
-  background: var(--color-accent);
-}
-@media (max-width: 640px) {
-  .stepper::before,
-  .stepper::after {
-    display: none;
-  }
-}
-.step-dot {
-  transition:
-    background 0.4s,
-    color 0.4s,
-    border-color 0.4s,
-    box-shadow 0.4s;
-}
-.step[data-state="done"] .step-dot {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-.step[data-state="done"] .step-title {
-  color: var(--color-soft);
-}
-.step[data-state="on"] .step-dot {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-ink);
-  box-shadow: 0 0 0 5px rgb(224 190 134 / 0.15);
-}
-.step[data-state="on"] .step-title {
-  color: var(--color-fg);
-}
-.step[data-state="on"] .step-body {
-  opacity: 1;
-  color: var(--color-soft);
-}
-
 /* ---------- Scroll cue ---------- */
 @keyframes cue {
   0%,
@@ -658,6 +607,10 @@ main [id] {
 }
 :root[data-chat="on"] .ask-header-btn {
   display: inline-flex;
+}
+/* Leave room under the footer links for the floating "Ask Wavelength" button. */
+:root[data-chat="on"] .site-footer > div {
+  padding-bottom: 88px !important; /* beats the py-10 utility */
 }
 /* While the chat is open the button reads as pressed; clicking it again closes the panel. */
 .ask-header-btn[data-active="1"] {

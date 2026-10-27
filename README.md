@@ -23,6 +23,18 @@ compositing in the browser. The Python pipeline exports the aligned bands once; 
 the stretch in a Web Worker as you move the sliders, and the result is tested pixel by pixel against
 astropy's own output.
 
+- **Scroll-driven hero:** three real filter exposures of the Whirlpool Galaxy are tinted, aligned and
+  stretched into colour, one stage per scroll, and play back in reverse on the way up.
+- **Viewer:** black point, stretch, softening and detection-threshold sliders, detected-source outlines,
+  zoom and pan, shareable links, and a bottom control dock on phones.
+- **Ask Wavelength:** an AI guide (Claude) that knows which galaxy and settings you're looking at and
+  only answers questions about astronomy and the site.
+
+<p>
+  <img src="assets/web_hero.webp" alt="The hero animation part-way through: three filter frames tinted red, green and blue" width="72%">
+  <img src="assets/web_phone.webp" alt="The viewer on a phone, with the control dock" width="24%">
+</p>
+
 - [`web/DESIGN.md`](web/DESIGN.md) — architecture, data format, renderer contract
 - [`web/BUILD_LOG.md`](web/BUILD_LOG.md) — how the redesign was built: decisions, checks, bugs fixed
 - [`CLAUDE.md`](CLAUDE.md) — working rules for the AI agent that built it

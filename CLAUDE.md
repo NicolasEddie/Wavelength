@@ -19,8 +19,9 @@ Two halves:
 - **Fonts are self-hosted** via `@fontsource` so builds need no network access.
 - **Design direction A ("editorial / observatory"):** tokens live in `web/app/globals.css` under `@theme`.
   One gold accent, neutral greys, the images supply the colour. Respect `prefers-reduced-motion`.
-- **Scope for the redesign:** UI only, no new pipeline features. Deferred: WebGL renderer, zoom/pan,
-  source hover, keyboard shortcuts, OG images, AI chat.
+- **Scope for the redesign:** UI only, no new pipeline features. Built since the first plan: zoom/pan and the
+  "Ask Wavelength" chat (`app/api/chat/route.ts`; key only in Vercel's environment). Still deferred: WebGL
+  renderer, source hover, keyboard shortcuts, OG images.
 
 ## Workflow
 

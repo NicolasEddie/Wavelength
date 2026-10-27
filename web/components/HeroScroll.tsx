@@ -299,7 +299,7 @@ export default function HeroScroll() {
           </div>
         </div>
 
-        <div ref={cueRef} data-on="1" className="hero-swap absolute inset-x-0 bottom-5 z-[2] flex flex-col items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-muted"
+        <div ref={cueRef} data-on="1" className="hero-swap max-sm:hidden absolute inset-x-0 bottom-5 z-[2] flex flex-col items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-muted"
           aria-hidden="true"
         >
           Scroll

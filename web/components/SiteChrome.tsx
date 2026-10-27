@@ -21,17 +21,17 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
 
 export function SiteFooter() {
   return (
-    <footer className="relative z-10 border-t border-rule">
+    <footer className="site-footer relative z-10 border-t border-rule">
       <div className="container-wide flex flex-wrap items-center justify-between gap-4 py-10 text-[13px] text-muted">
         <span>
-          Imagery: <a className="ulink" href="https://www.sdss.org/">SDSS</a> via{" "}
-          <a className="ulink" href="https://skyview.gsfc.nasa.gov/">NASA SkyView</a>, CC-BY.
+          Imagery: <a className="ulink" href="https://www.sdss.org/" target="_blank" rel="noopener noreferrer">SDSS</a> via{" "}
+          <a className="ulink" href="https://skyview.gsfc.nasa.gov/" target="_blank" rel="noopener noreferrer">NASA SkyView</a>, CC-BY.
         </span>
-        {/* The easter-egg hint: meteors cross the background about once a minute. */}
+        {/* The easter-egg hint: meteors cross the background every 12–22 seconds and can be clicked. */}
         <span className="font-display text-[15px] italic text-[#5f5c68]">Some things in this sky can be caught.</span>
         <span className="flex gap-5">
           <Link href="/learn#how-this-was-built" className="ulink">How this was built</Link>
-          <a href="https://github.com/NicolasEddie/Wavelength" className="ulink">GitHub</a>
+          <a href="https://github.com/NicolasEddie/Wavelength" className="ulink" target="_blank" rel="noopener noreferrer">GitHub</a>
         </span>
       </div>
     </footer>

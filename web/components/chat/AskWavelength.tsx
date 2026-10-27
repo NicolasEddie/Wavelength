@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { CHAT_STATE_EVENT, OPEN_CHAT_EVENT, TOGGLE_CHAT_EVENT, getViewerContext } from "@/lib/chatContext";
+import { CHAT_STATE_EVENT, TOGGLE_CHAT_EVENT, getViewerContext } from "@/lib/chatContext";
 import { TARGETS } from "@/lib/targets";
 
 /**
@@ -96,10 +96,8 @@ export default function AskWavelength() {
 
   useEffect(() => {
     const toggle = () => (openRef.current ? close() : show());
-    window.addEventListener(OPEN_CHAT_EVENT, show);
     window.addEventListener(TOGGLE_CHAT_EVENT, toggle);
     return () => {
-      window.removeEventListener(OPEN_CHAT_EVENT, show);
       window.removeEventListener(TOGGLE_CHAT_EVENT, toggle);
     };
   }, [show, close]);
