@@ -1,19 +1,21 @@
 import Link from "next/link";
 import Logo from "./Logo";
+import StickyHeader from "./StickyHeader";
 
-export function SiteHeader() {
+export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
   return (
-    <header className="relative z-10">
-      <div className="container-wide flex flex-wrap items-center justify-between gap-4 py-6">
+    <StickyHeader overlay={overlay}>
+      <div className="container-wide flex items-center justify-between gap-4 py-4 sm:py-6">
         <Logo />
-        <nav aria-label="Main" className="flex flex-wrap items-center gap-x-7 gap-y-2 text-sm">
-          <Link href="/#how" className="ulink">How it works</Link>
-          <Link href="/#targets" className="ulink">Targets</Link>
+        <nav aria-label="Main" className="flex items-center gap-x-5 text-sm sm:gap-x-7">
+          {/* On phones the sticky header keeps to one row: the in-page links drop out. */}
+          <Link href="/#how" className="ulink hidden sm:inline">How it works</Link>
+          <Link href="/#targets" className="ulink hidden sm:inline">Targets</Link>
           <Link href="/learn" className="ulink">The science</Link>
           <Link href="/targets/m51" className="btn btn-ghost btn-sm">Open the viewer</Link>
         </nav>
       </div>
-    </header>
+    </StickyHeader>
   );
 }
 

@@ -201,7 +201,8 @@ export default function HeroScroll() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[520svh]"
+      id="hero"
+      className="relative h-[590svh]"
       aria-label="How a colour image is built"
     >
       <div className="sticky top-0 h-svh overflow-hidden">

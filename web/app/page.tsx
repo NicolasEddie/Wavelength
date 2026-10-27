@@ -33,12 +33,8 @@ export default function Home() {
 
   return (
     <>
-      <div className="relative">
-        <div className="absolute inset-x-0 top-0 z-20">
-          <SiteHeader />
-        </div>
-        <HeroScroll />
-      </div>
+      <SiteHeader overlay />
+      <HeroScroll />
 
       <main>
         <section id="about" className="border-t border-rule">
