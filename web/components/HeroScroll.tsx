@@ -43,8 +43,12 @@ const STEPS = [
   },
 ];
 
-/** Scroll progress (0–1 through the section) at which each stage after the intro begins. */
-const STAGE_AT = [0.04, 0.27, 0.5, 0.73];
+/**
+ * Scroll progress (0–1 through the section) at which each stage after the intro begins. Evenly spaced,
+ * with the same distance again after the last stage before the page moves on, so every stage takes the
+ * same amount of scrolling (about 1.1 screens with the section height below).
+ */
+const STAGE_AT = [0.2, 0.4, 0.6, 0.8];
 /**
  * The images follow the chosen stage on a critically damped spring (no overshoot). Unlike a fixed-length
  * tween, a spring keeps its momentum when the target changes mid-move, so passing through several stages
@@ -223,7 +227,7 @@ export default function HeroScroll() {
     <section
       ref={sectionRef}
       id="hero"
-      className="relative h-[590svh]"
+      className="relative h-[665svh]"
       aria-label="How a colour image is built"
     >
       <div className="sticky top-0 h-svh overflow-hidden">
