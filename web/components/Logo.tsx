@@ -59,7 +59,7 @@ export default function Logo({ compact = false }: { compact?: boolean }) {
       return;
     }
     const screens = start / window.innerHeight;
-    const dur = Math.min(4200, Math.max(900, screens * 520));
+    const dur = Math.min(2200, Math.max(700, screens * 280));
     const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
     let raf = 0;
     const t0 = performance.now();

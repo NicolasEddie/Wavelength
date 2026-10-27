@@ -45,8 +45,15 @@ const STEPS = [
 
 /** Scroll progress (0–1 through the section) at which each stage after the intro begins. */
 const STAGE_AT = [0.04, 0.27, 0.5, 0.73];
-/** Time for one stage-to-stage transition of the images. */
-const STEP_MS = 1100;
+/**
+ * The images follow the chosen stage on a critically damped spring (no overshoot). Unlike a fixed-length
+ * tween, a spring keeps its momentum when the target changes mid-move, so passing through several stages
+ * (a fast scroll, or the logo's glide back to the top) plays as one continuous motion instead of a chain
+ * of separate steps with a pause between each. Higher = snappier; at 4.2 one step mostly lands in ~1 s.
+ */
+const SPRING = 4.2;
+/** Fastest the images may move, in stages per second, so a long jump never turns into a blur. */
+const MAX_SPEED = 4.5;
 
 // The merged frames sum to ~2.4x one grey frame (TINT_OTHER = 0.7 in scripts/make_hero_assets.py), and each
 // frame is stretched brighter than the composite, so dim them as they converge.
@@ -55,7 +62,6 @@ const MERGED_OPACITY = 0.28;
 const clamp = (x: number, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 /** Eased 0→1 as v moves from a to b. */
 const span = (v: number, a: number, b: number) => smooth(clamp((v - a) / (b - a)));
 
@@ -75,10 +81,9 @@ export default function HeroScroll() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let stage = -1; // stage chosen by scroll
     let v = 0; // where the image animation is now, 0–4 (stage units)
-    let from = 0;
-    let to = 0;
-    let t0 = 0;
-    let dur = 0;
+    let to = 0; // stage the images are heading to
+    let vel = 0; // stages per second
+    let last = 0;
     let anim = 0;
     let scrollRaf = 0;
 
@@ -141,10 +146,18 @@ export default function HeroScroll() {
     };
 
     const tick = (now: number) => {
-      const k = dur ? clamp((now - t0) / dur) : 1;
-      v = lerp(from, to, easeInOut(k));
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const accel = SPRING * SPRING * (to - v) - 2 * SPRING * vel;
+      vel = clamp(vel + accel * dt, -MAX_SPEED, MAX_SPEED);
+      v = clamp(v + vel * dt, 0, STEPS.length);
+      const settled = Math.abs(to - v) < 0.002 && Math.abs(vel) < 0.01;
+      if (settled) {
+        v = to;
+        vel = 0;
+      }
       draw();
-      anim = k < 1 ? requestAnimationFrame(tick) : 0;
+      anim = settled ? 0 : requestAnimationFrame(tick);
     };
 
     /** Switch the text immediately (CSS fades it) and play the images to the new stage. */
@@ -156,13 +169,19 @@ export default function HeroScroll() {
       capRefs.current.forEach((c, i) => c?.setAttribute("data-on", next === i + 1 ? "1" : "0"));
       if (barRef.current) barRef.current.style.transform = `scaleX(${next / STEPS.length})`;
 
-      cancelAnimationFrame(anim);
-      from = v;
       to = next;
-      // One full step takes STEP_MS; skipping several stages at once is quicker per step.
-      dur = reduced ? 0 : Math.min(STEP_MS * Math.abs(to - from), STEP_MS * 2.6);
-      t0 = performance.now();
-      anim = requestAnimationFrame(tick);
+      if (reduced) {
+        cancelAnimationFrame(anim);
+        anim = 0;
+        v = to;
+        draw();
+        return;
+      }
+      // Retarget without resetting velocity; start the loop only if it isn't already running.
+      if (!anim) {
+        last = performance.now();
+        anim = requestAnimationFrame(tick);
+      }
     };
 
     const onScroll = () => {
@@ -185,7 +204,9 @@ export default function HeroScroll() {
     // Start in whatever stage the page loaded at (e.g. after a reload part-way down), without animating.
     onScroll();
     v = to = stage;
+    vel = 0;
     cancelAnimationFrame(anim);
+    anim = 0;
     draw();
 
     window.addEventListener("scroll", schedule, { passive: true });
