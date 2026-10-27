@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { OPEN_CHAT_EVENT, getViewerContext } from "@/lib/chatContext";
+import { CHAT_STATE_EVENT, OPEN_CHAT_EVENT, TOGGLE_CHAT_EVENT, getViewerContext } from "@/lib/chatContext";
 import { TARGETS } from "@/lib/targets";
 
 /**
@@ -86,15 +86,28 @@ export default function AskWavelength() {
     setOpen(true);
   }, []);
 
-  useEffect(() => {
-    window.addEventListener(OPEN_CHAT_EVENT, show);
-    return () => window.removeEventListener(OPEN_CHAT_EVENT, show);
-  }, [show]);
-
   const close = useCallback(() => {
     setOpen(false);
     openerRef.current?.focus?.();
   }, []);
+
+  const openRef = useRef(open);
+  openRef.current = open;
+
+  useEffect(() => {
+    const toggle = () => (openRef.current ? close() : show());
+    window.addEventListener(OPEN_CHAT_EVENT, show);
+    window.addEventListener(TOGGLE_CHAT_EVENT, toggle);
+    return () => {
+      window.removeEventListener(OPEN_CHAT_EVENT, show);
+      window.removeEventListener(TOGGLE_CHAT_EVENT, toggle);
+    };
+  }, [show, close]);
+
+  // Let buttons elsewhere (the viewer's "Ask") reflect whether the panel is open.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(CHAT_STATE_EVENT, { detail: open }));
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;

@@ -659,6 +659,11 @@ main [id] {
 :root[data-chat="on"] .ask-header-btn {
   display: inline-flex;
 }
+/* While the chat is open the button reads as pressed; clicking it again closes the panel. */
+.ask-header-btn[data-active="1"] {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
 
 /* Shared page container: grows to 1600px on wide screens. */
 .container-wide {

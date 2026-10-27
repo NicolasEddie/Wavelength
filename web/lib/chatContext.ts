@@ -26,7 +26,15 @@ export function getViewerContext(): ViewerContext | null {
 
 /** Ask the chat panel to open (used by the viewer's header button). */
 export const OPEN_CHAT_EVENT = "wavelength:open-chat";
+/** Open the chat panel if it's closed, close it if it's open. */
+export const TOGGLE_CHAT_EVENT = "wavelength:toggle-chat";
+/** Fired by the chat panel whenever it opens or closes; `detail` is true when open. */
+export const CHAT_STATE_EVENT = "wavelength:chat-state";
 
 export function openChat() {
   window.dispatchEvent(new Event(OPEN_CHAT_EVENT));
+}
+
+export function toggleChat() {
+  window.dispatchEvent(new Event(TOGGLE_CHAT_EVENT));
 }

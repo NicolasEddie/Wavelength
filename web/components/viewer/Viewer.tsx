@@ -6,7 +6,7 @@ import { decodeBand, renderLupton, type Bands, type Manifest, type StretchParams
 import type { TargetInfo } from "@/lib/targets";
 import Logo from "@/components/Logo";
 import { MAX_ZOOM, useZoomPan } from "./useZoomPan";
-import { openChat, setViewerContext } from "@/lib/chatContext";
+import { CHAT_STATE_EVENT, setViewerContext, toggleChat } from "@/lib/chatContext";
 
 /**
  * The interactive viewer. Downloads the three linear band files for a target,
@@ -96,6 +96,12 @@ export default function Viewer({
   const [status, setStatus] = useState<Status>("loading");
   const [openInfo, setOpenInfo] = useState<string | null>(null);
   const [active, setActive] = useState("stretch");
+  const [chatOpen, setChatOpen] = useState(false);
+  useEffect(() => {
+    const onState = (e: Event) => setChatOpen(Boolean((e as CustomEvent<boolean>).detail));
+    window.addEventListener(CHAT_STATE_EVENT, onState);
+    return () => window.removeEventListener(CHAT_STATE_EVENT, onState);
+  }, []);
   const [dockOpen, setDockOpen] = useState(true);
   const [copied, setCopied] = useState<"idle" | "done" | "failed">("idle");
   const [aboutOpen, setAboutOpen] = useState(true);
@@ -380,7 +386,13 @@ export default function Viewer({
             <Link href="/learn" className="ulink text-sm max-sm:hidden">
               The science
             </Link>
-            <button type="button" onClick={openChat} className="ask-header-btn btn btn-ghost btn-sm gap-1.5">
+            <button
+              type="button"
+              onClick={toggleChat}
+              aria-expanded={chatOpen}
+              data-active={chatOpen ? "1" : undefined}
+              className="ask-header-btn btn btn-ghost btn-sm gap-1.5"
+            >
               <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
                 <path d="M8 1.5c.4 2.9 1.7 4.2 4.6 4.6-2.9.4-4.2 1.7-4.6 4.6-.4-2.9-1.7-4.2-4.6-4.6C6.3 5.7 7.6 4.4 8 1.5Z" />
               </svg>
