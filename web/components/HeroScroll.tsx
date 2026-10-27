@@ -18,11 +18,8 @@ import { useEffect, useRef } from "react";
  * Image styles are written straight to the DOM each animation frame; text switches with CSS transitions.
  */
 
-const FRAMES = [
-  { key: "i", label: "SDSS i · 763 nm" },
-  { key: "r", label: "SDSS r · 623 nm" },
-  { key: "g", label: "SDSS g · 477 nm" },
-];
+// Filter order: i, r, g (longest wavelength first), shown as red, green, blue.
+const FRAMES = [{ key: "i" }, { key: "r" }, { key: "g" }];
 
 const STEPS = [
   {
@@ -120,7 +117,7 @@ export default function HeroScroll() {
         // One soft, rounded black field behind all three frames, shrinking to hug the composite.
         const pad = s0 * 0.16;
         const w = lerp(s0 * 3 + gap * 2, sF, conv) + pad * 2;
-        const h = lerp(s0 + 30, sF, conv) + pad * 2; // +30: room for the filter labels
+        const h = lerp(s0, sF, conv) + pad * 2;
         const g = glowRef.current;
         g.style.width = `${w}px`;
         g.style.height = `${h}px`;
@@ -137,10 +134,9 @@ export default function HeroScroll() {
         f.style.top = cy;
         f.style.transform = `translate(-50%, -50%) translateX(${x}px)`;
         f.style.opacity = String((1 - fade * 0.92) * lerp(1, MERGED_OPACITY, conv));
-        const [grey, tinted, tag] = f.children as unknown as HTMLElement[];
+        const [grey, tinted] = f.children as unknown as HTMLElement[];
         grey.style.opacity = String(1 - tint);
         tinted.style.opacity = String(tint);
-        tag.style.opacity = String(sharpen * (1 - span(v, 2, 2.35)));
       });
       if (compRef.current) {
         compRef.current.style.width = `${sF}px`;
@@ -253,9 +249,6 @@ export default function HeroScroll() {
                 alt=""
                 style={{ opacity: 0 }}
               />
-              <span className="absolute inset-x-0 top-[calc(100%+12px)] whitespace-nowrap text-center text-[11px] tracking-[0.08em] text-muted sm:text-xs">
-                {f.label}
-              </span>
             </div>
           ))}
           <img
