@@ -46,7 +46,7 @@ const STEPS = [
 /** Scroll progress (0–1 through the section) at which each stage after the intro begins. */
 const STAGE_AT = [0.04, 0.27, 0.5, 0.73];
 /** Time for one stage-to-stage transition of the images. */
-const STEP_MS = 850;
+const STEP_MS = 1100;
 
 // The merged frames sum to ~2.4x one grey frame (TINT_OTHER = 0.7 in scripts/make_hero_assets.py), and each
 // frame is stretched brighter than the composite, so dim them as they converge.
@@ -160,7 +160,7 @@ export default function HeroScroll() {
       from = v;
       to = next;
       // One full step takes STEP_MS; skipping several stages at once is quicker per step.
-      dur = reduced ? 0 : Math.min(STEP_MS * Math.abs(to - from), STEP_MS * 1.6);
+      dur = reduced ? 0 : Math.min(STEP_MS * Math.abs(to - from), STEP_MS * 2.6);
       t0 = performance.now();
       anim = requestAnimationFrame(tick);
     };

@@ -46,13 +46,40 @@ export function Mark({ className = "" }: { className?: string }) {
 /** Mark plus wordmark. `compact` shows the mark alone (viewer header, phones). */
 export default function Logo({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname();
-  // Already on the home page: glide back to the top (the hero plays back in reverse) instead of reloading.
+  // Already on the home page: glide back to the top instead of reloading. The glide is timed (not the
+  // browser's quick smooth-scroll) so the hero has time to play back through each stage.
   const onClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (pathname !== "/" || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
     if (window.location.hash) history.replaceState(null, "", "/");
+    const start = window.scrollY;
+    if (start <= 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
+    const screens = start / window.innerHeight;
+    const dur = Math.min(4200, Math.max(900, screens * 520));
+    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    let raf = 0;
+    const t0 = performance.now();
+    // Any wheel, touch or key input hands control back to the visitor.
+    const stop = () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("wheel", stop);
+      window.removeEventListener("touchstart", stop);
+      window.removeEventListener("keydown", stop);
+    };
+    window.addEventListener("wheel", stop, { passive: true });
+    window.addEventListener("touchstart", stop, { passive: true });
+    window.addEventListener("keydown", stop);
+    const step = (now: number) => {
+      const k = Math.min(1, (now - t0) / dur);
+      window.scrollTo({ top: start * (1 - ease(k)), behavior: "instant" });
+      if (k < 1) raf = requestAnimationFrame(step);
+      else stop();
+    };
+    raf = requestAnimationFrame(step);
   };
   return (
     <Link href="/" onClick={onClick} className="brand inline-flex items-center gap-3 text-fg no-underline hover:text-fg" aria-label="Wavelength home">
